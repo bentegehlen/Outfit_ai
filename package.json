@@ -1,9 +1,1 @@
-{
-  "name": "outfit-ai-mobile-netlify",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "netlify dev"
-  },
-  "dependencies": {}
-}
+
