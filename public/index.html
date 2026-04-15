@@ -3,27 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Outfitfinder V2</title>
+  <title>Outfitfinder V3</title>
   <style>
     :root{
-      --bg:#020617;
-      --panel:#0f172a;
-      --card:#08101f;
-      --line:#1e293b;
-      --text:#f8fafc;
-      --muted:#94a3b8;
-      --accent:#22c55e;
-      --accent2:#34d399;
+      --bg:#05070d;
+      --panel:#0d121c;
+      --panel2:#121826;
+      --card:#0a0f18;
+      --line:#222b3a;
+      --line2:#313b4f;
+      --text:#f3f4f6;
+      --muted:#9ca3af;
+      --accent:#d1d5db;
+      --accentText:#111827;
       --danger:#ef4444;
-      --warn:#f59e0b;
+      --ok:#10b981;
     }
 
     *{box-sizing:border-box}
-
+    html{scroll-behavior:smooth}
     body{
       margin:0;
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:var(--bg);
+      font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:linear-gradient(180deg,#04060b,#0a0f18 35%,#05070d);
       color:var(--text);
       padding:12px;
     }
@@ -33,26 +35,48 @@
       margin:0 auto;
     }
 
+    h1,h2,h3,h4,p{margin:0}
+    .hero{
+      background:linear-gradient(180deg,#0d121c,#0a0f18);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px;
+      margin-bottom:14px;
+    }
+    .hero p{
+      color:var(--muted);
+      margin-top:8px;
+      line-height:1.45;
+    }
+
     .tabs{
-      display:flex;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
       gap:8px;
-      margin-bottom:12px;
+      margin-bottom:14px;
+      position:sticky;
+      top:8px;
+      z-index:10;
+      background:rgba(5,7,13,.75);
+      backdrop-filter:blur(8px);
+      padding:8px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.04);
     }
 
     .tabs button{
-      flex:1;
-      padding:12px;
       border:none;
       border-radius:14px;
       background:#111827;
-      color:#fff;
+      color:var(--text);
+      padding:12px;
       font-weight:800;
       cursor:pointer;
     }
 
     .tabs button.active{
-      background:linear-gradient(180deg,var(--accent2),var(--accent));
-      color:#04130a;
+      background:linear-gradient(180deg,#e5e7eb,#cbd5e1);
+      color:#111827;
     }
 
     .panel{
@@ -60,13 +84,12 @@
       background:var(--panel);
       border:1px solid var(--line);
       border-radius:20px;
-      padding:14px;
+      padding:16px;
       margin-bottom:14px;
+      box-shadow:0 16px 38px rgba(0,0,0,.22);
     }
 
     .panel.active{display:block}
-
-    h1,h2,h3,p{margin:0}
 
     .lead{
       color:var(--muted);
@@ -75,14 +98,38 @@
       line-height:1.45;
     }
 
-    input[type="file"],input[type="text"],select{
+    .grid2,.grid3{
+      display:grid;
+      gap:12px;
+    }
+
+    .grid2{grid-template-columns:1fr 1fr}
+    .grid3{grid-template-columns:repeat(3,1fr)}
+
+    label{
+      display:block;
+      font-size:.92rem;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+
+    input[type="file"],
+    input[type="text"],
+    select,
+    textarea{
       width:100%;
-      background:#08101f;
+      background:#0a0f18;
       color:var(--text);
-      border:1px solid var(--line);
+      border:1px solid var(--line2);
       border-radius:12px;
       padding:12px;
       margin:8px 0 12px;
+      font:inherit;
+    }
+
+    textarea{
+      min-height:84px;
+      resize:vertical;
     }
 
     button{
@@ -92,14 +139,15 @@
       padding:13px 16px;
       font-weight:800;
       cursor:pointer;
-      background:linear-gradient(180deg,var(--accent2),var(--accent));
-      color:#04130a;
+      background:linear-gradient(180deg,#e5e7eb,#cbd5e1);
+      color:#111827;
+      font:inherit;
     }
 
     button.secondary{
       background:#111827;
       color:#fff;
-      border:1px solid var(--line);
+      border:1px solid var(--line2);
     }
 
     button.danger{
@@ -147,8 +195,8 @@
     }
 
     .ok-box{
-      background:rgba(52,211,153,.12);
-      border:1px solid rgba(52,211,153,.35);
+      background:rgba(16,185,129,.12);
+      border:1px solid rgba(16,185,129,.35);
       color:#bbf7d0;
     }
 
@@ -168,21 +216,20 @@
 
     .scan-thumb{
       width:100%;
+      display:block;
       border-radius:12px;
       background:#fff;
       border:1px solid var(--line);
-      display:block;
-      margin-bottom:12px;
       object-fit:contain;
       max-height:420px;
+      margin-bottom:12px;
     }
 
     .scan-state{
       font-size:.92rem;
       margin-bottom:8px;
-      font-weight:700;
+      font-weight:800;
     }
-
     .scan-state.pending{color:var(--muted)}
     .scan-state.loading{color:#fde68a}
     .scan-state.ok{color:#bbf7d0}
@@ -200,14 +247,14 @@
       padding:6px 10px;
       border-radius:999px;
       background:#111827;
-      border:1px solid var(--line);
+      border:1px solid var(--line2);
       color:var(--muted);
       font-size:.82rem;
     }
 
     .badge.category{
-      background:var(--accent);
-      color:#04130a;
+      background:linear-gradient(180deg,#e5e7eb,#cbd5e1);
+      color:#111827;
       border:none;
       font-weight:800;
     }
@@ -220,7 +267,7 @@
     }
 
     .meta-box{
-      background:#0b1220;
+      background:#0d1420;
       border:1px solid var(--line);
       border-radius:12px;
       padding:10px;
@@ -239,13 +286,13 @@
       word-break:break-word;
     }
 
-    .catalog-list,.outfit-list{
+    .catalog-list,.outfit-list,.looks-list{
       display:grid;
       gap:12px;
       margin-top:12px;
     }
 
-    .catalog-item,.outfit-card{
+    .catalog-item,.outfit-card,.look-card{
       background:var(--card);
       border:1px solid var(--line);
       border-radius:16px;
@@ -279,6 +326,13 @@
       line-height:1.25;
     }
 
+    .edit-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+
     .empty{
       text-align:center;
       color:var(--muted);
@@ -290,115 +344,44 @@
 
     .outfit-layout{
       display:grid;
-      grid-template-columns:360px 1fr;
+      grid-template-columns:380px 1fr;
       gap:14px;
       align-items:start;
     }
 
-    .silhouette{
-      position:relative;
-      height:440px;
+    .render-box{
       background:#0b1220;
       border:1px solid var(--line);
       border-radius:16px;
-      overflow:hidden;
+      padding:10px;
     }
 
-    .figure{
-      position:absolute;
-      inset:0;
+    .render-box img{
+      width:100%;
+      display:block;
+      border-radius:12px;
+      background:#fff;
     }
 
-    .figure .head,
-    .figure .torso,
-    .figure .hip,
-    .figure .legL,
-    .figure .legR,
-    .figure .armL,
-    .figure .armR{
-      position:absolute;
-      background:#243247;
-      opacity:.95;
+    .render-placeholder{
+      border:1px dashed var(--line2);
+      border-radius:12px;
+      min-height:420px;
+      display:grid;
+      place-items:center;
+      color:var(--muted);
+      text-align:center;
+      padding:16px;
+      background:#0a0f18;
     }
 
-    .figure .head{
-      width:54px;height:54px;border-radius:999px;left:50%;top:20px;transform:translateX(-50%);
-    }
-
-    .figure .torso{
-      width:96px;height:116px;left:50%;top:82px;transform:translateX(-50%);border-radius:26px;
-    }
-
-    .figure .hip{
-      width:92px;height:42px;left:50%;top:188px;transform:translateX(-50%);border-radius:18px;
-    }
-
-    .figure .legL,.figure .legR{
-      width:26px;height:150px;top:220px;border-radius:999px;
-    }
-
-    .figure .legL{left:calc(50% - 34px)}
-    .figure .legR{left:calc(50% + 8px)}
-
-    .figure .armL,.figure .armR{
-      width:20px;height:108px;top:92px;border-radius:999px;
-    }
-
-    .figure .armL{left:calc(50% - 62px);transform:rotate(8deg)}
-    .figure .armR{left:calc(50% + 42px);transform:rotate(-8deg)}
-
-    .layer{
-      position:absolute;
-      object-fit:contain;
-      filter:drop-shadow(0 8px 18px rgba(0,0,0,.35));
-    }
-
-    /* deutlich bessere Platzierung */
-    .layer.top{
-      left:50%;
-      top:82px;
-      transform:translateX(-50%);
-      width:136px;
-      height:128px;
-    }
-
-    .layer.bottom{
-      left:50%;
-      top:188px;
-      transform:translateX(-50%);
-      width:150px;
-      height:150px;
-    }
-
-    .layer.dress{
-      left:50%;
-      top:82px;
-      transform:translateX(-50%);
-      width:170px;
-      height:250px;
-    }
-
-    .layer.shoesL{
-      top:360px;
-      left:calc(50% - 42px);
-      width:42px;
-      height:34px;
-    }
-
-    .layer.shoesR{
-      top:360px;
-      left:calc(50% + 2px);
-      width:42px;
-      height:34px;
-    }
-
-    .outfit-meta{
+    .look-meta{
       display:grid;
       gap:10px;
     }
 
     .piece-card{
-      background:#0b1220;
+      background:#0d1420;
       border:1px solid var(--line);
       border-radius:12px;
       padding:10px;
@@ -410,21 +393,42 @@
     }
 
     .score{
-      color:#bbf7d0;
+      color:#e5e7eb;
       font-weight:800;
       margin-top:8px;
+    }
+
+    .section-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .muted{color:var(--muted)}
+
+    .back-top{
+      margin-top:16px;
+      text-align:center;
+    }
+
+    .back-top button{
+      max-width:220px;
+      margin:0 auto;
     }
 
     @media (min-width:760px){
       .scan-grid{grid-template-columns:1fr 1fr}
     }
 
-    @media (max-width:900px){
+    @media (max-width:980px){
       .outfit-layout{grid-template-columns:1fr}
     }
 
-    @media (max-width:640px){
-      .meta-grid{grid-template-columns:1fr}
+    @media (max-width:760px){
+      .tabs{grid-template-columns:repeat(2,1fr)}
+      .grid2,.grid3,.meta-grid,.edit-grid{grid-template-columns:1fr}
       .catalog-top{flex-direction:column}
       .catalog-thumb{
         width:100%;
@@ -435,16 +439,22 @@
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="wrap" id="top">
+    <div class="hero">
+      <h1>Outfitfinder V3</h1>
+      <p>Multi-Upload, Katalog, bearbeitbare Teile, 3 Outfit-Vorschläge, neue Varianten auf Knopfdruck und Rendering als clean mannequin Bild — auf Basis deiner echten Kleidungsbilder plus Analysedaten.</p>
+    </div>
+
     <div class="tabs">
       <button class="active" id="tab-scan" onclick="setTab('scan')">Scan</button>
       <button id="tab-catalog" onclick="setTab('catalog')">Katalog</button>
       <button id="tab-outfits" onclick="setTab('outfits')">Outfits</button>
+      <button id="tab-looks" onclick="setTab('looks')">Looks</button>
     </div>
 
     <div class="panel active" id="panel-scan">
-      <h1>Outfitfinder V2</h1>
-      <p class="lead">Mehrere Bilder auswählen, einzeln oder gesammelt analysieren und anschließend sauber speichern.</p>
+      <h2>Scan</h2>
+      <p class="lead">Mehrere Bilder auswählen, einzeln oder gesammelt analysieren und danach speichern.</p>
 
       <input type="file" id="fileInput" accept="image/*" multiple />
 
@@ -459,9 +469,18 @@
       <div class="ok-box" id="okBox"></div>
 
       <div id="scanGrid" class="scan-grid"></div>
+
+      <div class="back-top">
+        <button class="secondary" onclick="scrollToTop()">Zurück nach oben</button>
+      </div>
     </div>
 
     <div class="panel" id="panel-catalog">
+      <div class="section-head">
+        <h2>Katalog</h2>
+        <span class="muted" id="catalogCount">0 Teile</span>
+      </div>
+
       <input type="text" id="searchInput" placeholder="Suche..." oninput="renderCatalog()" />
 
       <div class="actions">
@@ -473,28 +492,102 @@
       <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData()" />
 
       <div id="catalogList" class="catalog-list"></div>
+
+      <div class="back-top">
+        <button class="secondary" onclick="scrollToTop()">Zurück nach oben</button>
+      </div>
     </div>
 
     <div class="panel" id="panel-outfits">
-      <div class="actions">
-        <button onclick="generateOutfits()">3 Outfits erzeugen</button>
+      <h2>Outfits</h2>
+      <p class="lead">Wünsche eingeben, 3 Vorschläge erzeugen und pro Vorschlag ein Renderbild erstellen.</p>
+
+      <div class="grid2">
+        <div>
+          <label for="occasionInput">Anlass</label>
+          <select id="occasionInput">
+            <option value="alltag">Alltag</option>
+            <option value="date">Date</option>
+            <option value="party">Party</option>
+            <option value="festival">Festival</option>
+            <option value="club">Club</option>
+            <option value="friends">Friends Meet</option>
+            <option value="work">Arbeit</option>
+          </select>
+        </div>
+        <div>
+          <label for="styleInput">Stil</label>
+          <select id="styleInput">
+            <option value="dark">Dark</option>
+            <option value="clean">Clean</option>
+            <option value="sexy">Sexy</option>
+            <option value="edgy">Edgy</option>
+            <option value="industrial">Industrial</option>
+            <option value="sporty">Sporty</option>
+            <option value="elevated">Elevated</option>
+          </select>
+        </div>
       </div>
+
+      <div class="grid2">
+        <div>
+          <label for="warmthInput">Wärme</label>
+          <select id="warmthInput">
+            <option value="light">Light</option>
+            <option value="medium">Medium</option>
+            <option value="warm">Warm</option>
+          </select>
+        </div>
+        <div>
+          <label for="extraInput">Zusatzwunsch</label>
+          <input type="text" id="extraInput" placeholder="z. B. layered, party, mary janes, kein Kleid" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button onclick="generateOutfits()">3 Vorschläge erzeugen</button>
+        <button class="secondary" onclick="generateOutfits()">Neue Vorschläge</button>
+      </div>
+
       <div id="outfitList" class="outfit-list"></div>
+
+      <div class="back-top">
+        <button class="secondary" onclick="scrollToTop()">Zurück nach oben</button>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-looks">
+      <div class="section-head">
+        <h2>Looks</h2>
+        <span class="muted" id="looksCount">0 Looks</span>
+      </div>
+
+      <div id="looksList" class="looks-list"></div>
+
+      <div class="back-top">
+        <button class="secondary" onclick="scrollToTop()">Zurück nach oben</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "outfitfinder_items_v2";
+    const STORAGE_KEY = "outfitfinder_items_v3";
+    const LOOKS_KEY = "outfitfinder_saved_looks_v3";
+
     let batchItems = [];
     let generatedLooks = [];
 
     function setTab(name) {
-      ["scan", "catalog", "outfits"].forEach(id => {
+      ["scan", "catalog", "outfits", "looks"].forEach(id => {
         document.getElementById("panel-" + id).classList.remove("active");
         document.getElementById("tab-" + id).classList.remove("active");
       });
       document.getElementById("panel-" + name).classList.add("active");
       document.getElementById("tab-" + name).classList.add("active");
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function uid() {
@@ -511,6 +604,18 @@
 
     function saveItems(items) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function loadLooks() {
+      try {
+        return JSON.parse(localStorage.getItem(LOOKS_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveLooks(looks) {
+      localStorage.setItem(LOOKS_KEY, JSON.stringify(looks));
     }
 
     function escapeHtml(value) {
@@ -696,6 +801,19 @@
       document.getElementById("statusText").textContent = "Analyse abgeschlossen.";
     }
 
+    function normalizeSubcategory(item) {
+      if (item.subcategory) return item.subcategory;
+
+      const cat = item.category || "";
+      if (cat === "top") return "base top";
+      if (cat === "bottom") return "skirt";
+      if (cat === "dress") return "dress";
+      if (cat === "outerwear") return "jacket";
+      if (cat === "shoes") return "shoes";
+      if (cat === "accessory") return "necklace";
+      return "";
+    }
+
     function saveOne(id) {
       hideError();
       hideOk();
@@ -710,11 +828,12 @@
       items.unshift({
         id: uid(),
         ...item.analysis,
+        subcategory: normalizeSubcategory(item.analysis),
         favorite: false,
         img: item.imageDataUrl
       });
-      saveItems(items);
 
+      saveItems(items);
       item.saved = true;
       renderBatch();
       renderCatalog();
@@ -736,6 +855,7 @@
         items.unshift({
           id: uid(),
           ...item.analysis,
+          subcategory: normalizeSubcategory(item.analysis),
           favorite: false,
           img: item.imageDataUrl
         });
@@ -756,6 +876,14 @@
       renderCatalog();
     }
 
+    function updateItemField(id, field, value) {
+      const items = loadItems().map(item =>
+        item.id === id ? { ...item, [field]: value } : item
+      );
+      saveItems(items);
+      renderCatalog();
+    }
+
     function renderCatalog() {
       const q = (document.getElementById("searchInput").value || "").toLowerCase();
 
@@ -764,8 +892,11 @@
         (i.suggestedName || "").toLowerCase().includes(q) ||
         (i.color || "").toLowerCase().includes(q) ||
         (i.category || "").toLowerCase().includes(q) ||
+        (i.subcategory || "").toLowerCase().includes(q) ||
         (i.styleTags || []).join(" ").toLowerCase().includes(q)
       );
+
+      document.getElementById("catalogCount").textContent = `${items.length} Teile`;
 
       const list = document.getElementById("catalogList");
 
@@ -780,15 +911,26 @@
             <img class="catalog-thumb" src="${i.img}" alt="${escapeHtml(i.suggestedName)}" />
             <div class="catalog-content">
               <h3>${escapeHtml(i.suggestedName || "Unbenannt")}</h3>
+
               <div class="badge-row">
                 <span class="badge category">${escapeHtml(i.category || "-")}</span>
                 <span class="badge">${escapeHtml(i.color || "-")}</span>
                 ${i.favorite ? `<span class="badge">★ Favorit</span>` : ""}
               </div>
-              <div class="badge-row">
-                <span class="badge">${escapeHtml((i.styleTags || []).join(", ") || "-")}</span>
-                <span class="badge">${escapeHtml((i.materialHints || []).join(", ") || "-")}</span>
+
+              <div class="edit-grid">
+                <div>
+                  <label>Name</label>
+                  <input type="text" value="${escapeHtml(i.suggestedName || "")}" onchange="updateItemField('${i.id}','suggestedName',this.value)" />
+                </div>
+                <div>
+                  <label>Unterkategorie</label>
+                  <select onchange="updateItemField('${i.id}','subcategory',this.value)">
+                    ${renderSubcategoryOptions(i.subcategory || normalizeSubcategory(i))}
+                  </select>
+                </div>
               </div>
+
               <div class="actions">
                 <button class="small secondary" onclick="toggleFavorite('${i.id}')">${i.favorite ? "Favorit entfernen" : "Favorit"}</button>
                 <button class="small danger" onclick="deleteItem('${i.id}')">Löschen</button>
@@ -797,6 +939,16 @@
           </div>
         </div>
       `).join("");
+    }
+
+    function renderSubcategoryOptions(current) {
+      const options = [
+        "base top","second top","corsage","cardigan","jacket","coat",
+        "skirt","shorts","trousers","dress",
+        "fishnets","tights","socks","legwarmers",
+        "shoes","bag","necklace","choker","earrings","harness","belt"
+      ];
+      return options.map(opt => `<option value="${opt}" ${opt === current ? "selected" : ""}>${opt}</option>`).join("");
     }
 
     function deleteItem(id) {
@@ -809,6 +961,7 @@
       if (!confirm("Wirklich alle gespeicherten Teile löschen?")) return;
       localStorage.removeItem(STORAGE_KEY);
       renderCatalog();
+      generatedLooks = [];
       document.getElementById("outfitList").innerHTML = '<div class="empty">Noch keine Outfits erzeugt.</div>';
     }
 
@@ -840,74 +993,13 @@
       r.readAsText(f);
     }
 
-    function scoreItem(item, usedIds) {
-      let score = 0;
-      if (item.favorite) score += 3;
-      score += (item.confidence || 0) * 2;
-      if (!usedIds.has(item.id)) score += 2;
-      return score;
-    }
-
-    function bestCandidate(items, category, usedIds) {
-      const filtered = items
-        .filter(i => i.category === category)
-        .map(i => ({ item: i, score: scoreItem(i, usedIds) }))
-        .sort((a, b) => b.score - a.score);
-
-      return filtered[0]?.item || null;
-    }
-
-    function rotatePick(items, category, offset) {
-      const filtered = items.filter(i => i.category === category);
+    function pickRotating(items, allowedSubcategories, offset) {
+      const filtered = items.filter(i => allowedSubcategories.includes(i.subcategory));
       if (!filtered.length) return null;
-      return filtered[offset % filtered.length];
-    }
 
-    function renderOutfitCard(look, index) {
-      const useDress = !!look.dress;
-
-      return `
-        <div class="outfit-card">
-          <h3>Outfit ${index + 1}</h3>
-          <div class="outfit-layout">
-            <div class="silhouette">
-              <div class="figure">
-                <div class="head"></div>
-                <div class="torso"></div>
-                <div class="hip"></div>
-                <div class="legL"></div>
-                <div class="legR"></div>
-                <div class="armL"></div>
-                <div class="armR"></div>
-
-                ${useDress ? `<img class="layer dress" src="${look.dress.img}" alt="">` : ""}
-                ${!useDress && look.top ? `<img class="layer top" src="${look.top.img}" alt="">` : ""}
-                ${!useDress && look.bottom ? `<img class="layer bottom" src="${look.bottom.img}" alt="">` : ""}
-                ${look.shoes ? `<img class="layer shoesL" src="${look.shoes.img}" alt=""><img class="layer shoesR" src="${look.shoes.img}" alt="">` : ""}
-              </div>
-            </div>
-
-            <div class="outfit-meta">
-              <div class="meta-box">
-                <strong>Top</strong>
-                <span>${look.top ? escapeHtml(look.top.suggestedName) : "-"}</span>
-              </div>
-              <div class="meta-box">
-                <strong>Bottom</strong>
-                <span>${look.bottom ? escapeHtml(look.bottom.suggestedName) : "-"}</span>
-              </div>
-              <div class="meta-box">
-                <strong>Dress</strong>
-                <span>${look.dress ? escapeHtml(look.dress.suggestedName) : "-"}</span>
-              </div>
-              <div class="meta-box">
-                <strong>Schuhe</strong>
-                <span>${look.shoes ? escapeHtml(look.shoes.suggestedName) : "-"}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+      const favorites = filtered.filter(i => i.favorite);
+      const pool = favorites.length ? favorites.concat(filtered.filter(i => !i.favorite)) : filtered;
+      return pool[offset % pool.length];
     }
 
     function generateOutfits() {
@@ -917,30 +1009,244 @@
         return;
       }
 
+      const occasion = document.getElementById("occasionInput").value;
+      const style = document.getElementById("styleInput").value;
+      const warmth = document.getElementById("warmthInput").value;
+      const extra = document.getElementById("extraInput").value.trim();
+
       generatedLooks = [];
 
       for (let i = 0; i < 3; i++) {
-        const top = rotatePick(items, "top", i);
-        const bottom = rotatePick(items, "bottom", i);
-        const dress = rotatePick(items, "dress", i);
-        const shoes = rotatePick(items, "shoes", i);
+        const look = {
+          id: uid(),
+          occasion,
+          style,
+          warmth,
+          extra,
+          baseTop: pickRotating(items, ["base top"], i),
+          secondTop: pickRotating(items, ["second top","corsage","cardigan"], i),
+          outerwear: pickRotating(items, ["jacket","coat"], i),
+          bottom: pickRotating(items, ["skirt","shorts","trousers"], i),
+          dress: pickRotating(items, ["dress"], i),
+          legwear1: pickRotating(items, ["fishnets","tights"], i),
+          legwear2: pickRotating(items, ["socks","legwarmers"], i),
+          legwear3: pickRotating(items, ["socks","legwarmers"], i + 1),
+          shoes: pickRotating(items, ["shoes"], i),
+          accessory1: pickRotating(items, ["necklace","choker"], i),
+          accessory2: pickRotating(items, ["earrings","bag","belt","harness"], i),
+          accessory3: pickRotating(items, ["bag","belt","harness"], i + 1),
+          accessory4: pickRotating(items, ["earrings","necklace","choker"], i + 1),
+          renderedImage: null,
+          rendering: false,
+          renderError: ""
+        };
 
-        const useDress = !!dress && (i === 2 || (!top || !bottom));
+        if (look.dress && i === 2) {
+          look.baseTop = null;
+          look.secondTop = null;
+          look.bottom = null;
+        }
 
-        generatedLooks.push({
-          top: useDress ? null : top,
-          bottom: useDress ? null : bottom,
-          dress: useDress ? dress : null,
-          shoes
-        });
+        generatedLooks.push(look);
       }
 
-      document.getElementById("outfitList").innerHTML = generatedLooks
-        .map((look, i) => renderOutfitCard(look, i))
-        .join("");
+      renderGeneratedLooks();
+    }
+
+    function pieceName(item) {
+      return item ? item.suggestedName || item.subcategory || "-" : "-";
+    }
+
+    function renderGeneratedLooks() {
+      const list = document.getElementById("outfitList");
+
+      if (!generatedLooks.length) {
+        list.innerHTML = '<div class="empty">Noch keine Outfits erzeugt.</div>';
+        return;
+      }
+
+      list.innerHTML = generatedLooks.map((look, index) => `
+        <div class="outfit-card">
+          <div class="section-head">
+            <div>
+              <h3>Outfit ${index + 1}</h3>
+              <p class="lead" style="margin:6px 0 0;">${escapeHtml(look.occasion)} · ${escapeHtml(look.style)} · ${escapeHtml(look.warmth)}${look.extra ? " · " + escapeHtml(look.extra) : ""}</p>
+            </div>
+            <div class="score">${outfitScore(look)}/100</div>
+          </div>
+
+          <div class="outfit-layout">
+            <div class="render-box">
+              ${look.renderedImage
+                ? `<img src="${look.renderedImage}" alt="Rendered Outfit">`
+                : `<div class="render-placeholder">${look.rendering ? "Rendering läuft..." : "Noch kein Renderbild. Nutze „Outfit rendern“."}</div>`
+              }
+
+              ${look.renderError ? `<div class="error-box" style="display:block;margin-top:10px;">${escapeHtml(look.renderError)}</div>` : ""}
+
+              <div class="actions" style="margin-top:12px;">
+                <button onclick="renderOutfit(${index})">${look.rendering ? "Rendering..." : "✨ Outfit rendern"}</button>
+                <button class="secondary" onclick="saveLook(${index})">Look speichern</button>
+              </div>
+            </div>
+
+            <div class="look-meta">
+              <div class="piece-card"><strong>Base Top</strong><span class="muted">${escapeHtml(pieceName(look.baseTop))}</span></div>
+              <div class="piece-card"><strong>Second Top</strong><span class="muted">${escapeHtml(pieceName(look.secondTop))}</span></div>
+              <div class="piece-card"><strong>Outerwear</strong><span class="muted">${escapeHtml(pieceName(look.outerwear))}</span></div>
+              <div class="piece-card"><strong>Bottom / Dress</strong><span class="muted">${escapeHtml(pieceName(look.bottom || look.dress))}</span></div>
+              <div class="piece-card"><strong>Legwear</strong><span class="muted">${escapeHtml([pieceName(look.legwear1), pieceName(look.legwear2), pieceName(look.legwear3)].filter(x => x !== "-").join(" · ") || "-")}</span></div>
+              <div class="piece-card"><strong>Schuhe</strong><span class="muted">${escapeHtml(pieceName(look.shoes))}</span></div>
+              <div class="piece-card"><strong>Accessoires</strong><span class="muted">${escapeHtml([pieceName(look.accessory1), pieceName(look.accessory2), pieceName(look.accessory3), pieceName(look.accessory4)].filter(x => x !== "-").join(" · ") || "-")}</span></div>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function outfitScore(look) {
+      const pieces = [
+        look.baseTop, look.secondTop, look.outerwear, look.bottom, look.dress,
+        look.legwear1, look.legwear2, look.legwear3, look.shoes,
+        look.accessory1, look.accessory2, look.accessory3, look.accessory4
+      ].filter(Boolean);
+
+      if (!pieces.length) return 0;
+      const avg = pieces.reduce((sum, p) => sum + Math.round((p.confidence || 0) * 100), 0) / pieces.length;
+      return Math.round(avg);
+    }
+
+    function buildRenderItems(look) {
+      const all = [
+        look.baseTop, look.secondTop, look.outerwear,
+        look.bottom, look.dress,
+        look.legwear1, look.legwear2, look.legwear3,
+        look.shoes,
+        look.accessory1, look.accessory2, look.accessory3, look.accessory4
+      ].filter(Boolean);
+
+      const unique = [];
+      const seen = new Set();
+
+      for (const item of all) {
+        if (!seen.has(item.id)) {
+          unique.push({
+            name: item.suggestedName || item.subcategory || item.category || "item",
+            category: item.category || "",
+            subcategory: item.subcategory || "",
+            color: item.color || "",
+            imageDataUrl: item.img || ""
+          });
+          seen.add(item.id);
+        }
+      }
+      return unique;
+    }
+
+    async function renderOutfit(index) {
+      const look = generatedLooks[index];
+      if (!look) return;
+
+      look.rendering = true;
+      look.renderError = "";
+      renderGeneratedLooks();
+
+      try {
+        const items = buildRenderItems(look);
+
+        const res = await fetch("/.netlify/functions/generate-outfit-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items,
+            style: look.style,
+            occasion: look.occasion,
+            warmth: look.warmth,
+            extra: look.extra
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || "Rendering fehlgeschlagen.");
+        if (!data.image) throw new Error("Kein Bild erhalten.");
+
+        look.renderedImage = data.image;
+        look.renderError = "";
+      } catch (err) {
+        look.renderError = err.message || "Unbekannter Fehler.";
+      } finally {
+        look.rendering = false;
+        renderGeneratedLooks();
+      }
+    }
+
+    function saveLook(index) {
+      const look = generatedLooks[index];
+      if (!look) return;
+
+      const looks = loadLooks();
+      looks.unshift({
+        id: uid(),
+        createdAt: new Date().toISOString(),
+        ...look
+      });
+      saveLooks(looks);
+      renderLooks();
+      setTab("looks");
+    }
+
+    function deleteLook(id) {
+      const looks = loadLooks().filter(l => l.id !== id);
+      saveLooks(looks);
+      renderLooks();
+    }
+
+    function renderLooks() {
+      const looks = loadLooks();
+      document.getElementById("looksCount").textContent = `${looks.length} Looks`;
+
+      const list = document.getElementById("looksList");
+
+      if (!looks.length) {
+        list.innerHTML = '<div class="empty">Noch keine gespeicherten Looks.</div>';
+        return;
+      }
+
+      list.innerHTML = looks.map((look, index) => `
+        <div class="look-card">
+          <div class="section-head">
+            <div>
+              <h3>Look ${index + 1}</h3>
+              <p class="lead" style="margin:6px 0 0;">${escapeHtml(look.occasion)} · ${escapeHtml(look.style)} · ${escapeHtml(look.warmth)}${look.extra ? " · " + escapeHtml(look.extra) : ""}</p>
+            </div>
+            <button class="small danger" onclick="deleteLook('${look.id}')">Look löschen</button>
+          </div>
+
+          <div class="outfit-layout">
+            <div class="render-box">
+              ${look.renderedImage
+                ? `<img src="${look.renderedImage}" alt="Saved Look">`
+                : `<div class="render-placeholder">Kein gespeichertes Renderbild.</div>`
+              }
+            </div>
+
+            <div class="look-meta">
+              <div class="piece-card"><strong>Base Top</strong><span class="muted">${escapeHtml(pieceName(look.baseTop))}</span></div>
+              <div class="piece-card"><strong>Second Top</strong><span class="muted">${escapeHtml(pieceName(look.secondTop))}</span></div>
+              <div class="piece-card"><strong>Outerwear</strong><span class="muted">${escapeHtml(pieceName(look.outerwear))}</span></div>
+              <div class="piece-card"><strong>Bottom / Dress</strong><span class="muted">${escapeHtml(pieceName(look.bottom || look.dress))}</span></div>
+              <div class="piece-card"><strong>Legwear</strong><span class="muted">${escapeHtml([pieceName(look.legwear1), pieceName(look.legwear2), pieceName(look.legwear3)].filter(x => x !== "-").join(" · ") || "-")}</span></div>
+              <div class="piece-card"><strong>Schuhe</strong><span class="muted">${escapeHtml(pieceName(look.shoes))}</span></div>
+              <div class="piece-card"><strong>Accessoires</strong><span class="muted">${escapeHtml([pieceName(look.accessory1), pieceName(look.accessory2), pieceName(look.accessory3), pieceName(look.accessory4)].filter(x => x !== "-").join(" · ") || "-")}</span></div>
+            </div>
+          </div>
+        </div>
+      `).join("");
     }
 
     renderCatalog();
+    renderLooks();
     document.getElementById("scanGrid").innerHTML = '<div class="empty">Noch keine Bilder ausgewählt.</div>';
     document.getElementById("outfitList").innerHTML = '<div class="empty">Noch keine Outfits erzeugt.</div>';
   </script>
