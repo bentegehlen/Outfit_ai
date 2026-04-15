@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Outfitfinder</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outfit App</title>
 
 <style>
-:root {
+:root{
 --bg:#020617;
 --panel:#0f172a;
 --line:#1e293b;
@@ -16,7 +16,7 @@
 --danger:#ef4444;
 }
 
-body {
+body{
 margin:0;
 font-family:system-ui;
 background:var(--bg);
@@ -24,41 +24,33 @@ color:var(--text);
 padding:12px;
 }
 
-.tabbar{
+.tabs{
 display:flex;
 gap:6px;
-margin-bottom:12px;
+margin-bottom:10px;
 }
 
-.tabbar button{
+.tabs button{
 flex:1;
 padding:12px;
-border-radius:12px;
+border-radius:10px;
 border:none;
 background:#111827;
 color:white;
 }
 
-.tabbar button.active{
+.tabs .active{
 background:var(--accent);
 color:black;
 font-weight:bold;
 }
 
-.panel{
-display:none;
-background:var(--panel);
-border:1px solid var(--line);
-border-radius:16px;
-padding:14px;
-}
-
+.panel{display:none;background:var(--panel);padding:12px;border-radius:12px;}
 .panel.active{display:block;}
 
 input,select{
 width:100%;
-margin-top:8px;
-margin-bottom:10px;
+margin:8px 0;
 padding:10px;
 border-radius:10px;
 border:1px solid var(--line);
@@ -66,258 +58,207 @@ background:#020617;
 color:white;
 }
 
-button.main{
+button{
+padding:12px;
+border:none;
+border-radius:10px;
 background:var(--accent);
 color:black;
 font-weight:bold;
-padding:14px;
-border:none;
-border-radius:12px;
 width:100%;
+margin-top:6px;
 }
 
 img{
 width:100%;
-border-radius:12px;
+border-radius:10px;
 margin-top:10px;
 }
 
 .card{
 background:#020617;
 border:1px solid var(--line);
-border-radius:12px;
 padding:10px;
+border-radius:10px;
 margin-top:10px;
 }
 
-.small{
-font-size:12px;
-color:var(--muted);
+.silhouette{
+position:relative;
+height:300px;
+background:#08101f;
+border-radius:12px;
+margin-top:10px;
 }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
+.layer{
+position:absolute;
+width:80px;
+left:50%;
+transform:translateX(-50%);
 }
 
-.tag{
-background:#111827;
-padding:6px 10px;
-border-radius:999px;
-font-size:12px;
-}
+.top{top:60px;}
+.bottom{top:140px;}
+.shoes{top:240px;}
 
+.small{font-size:12px;color:var(--muted);}
 </style>
 </head>
 
 <body>
 
-<div class="tabbar">
-<button onclick="setTab('scan')" id="t-scan" class="active">Scan</button>
-<button onclick="setTab('catalog')" id="t-cat">Katalog</button>
-<button onclick="setTab('outfits')" id="t-out">Outfits</button>
+<div class="tabs">
+<button class="active" onclick="tab('scan')" id="t-scan">Scan</button>
+<button onclick="tab('cat')" id="t-cat">Katalog</button>
+<button onclick="tab('out')" id="t-out">Outfits</button>
 </div>
 
-<!-- SCAN -->
 <div id="scan" class="panel active">
 
-<input type="file" id="fileInput" multiple />
+<input type="file" id="file">
 
-<button class="main" onclick="analyze()">AI erkennen</button>
+<button onclick="analyze()">Analysieren</button>
 
-<img id="preview"/>
+<img id="preview">
 
 <div id="result"></div>
 
-<button class="main" onclick="saveItem()">Speichern</button>
+<button onclick="save()">Speichern</button>
 
 </div>
 
-<!-- KATALOG -->
-<div id="catalog" class="panel">
+<div id="cat" class="panel">
 
-<input placeholder="Suche..." id="search" oninput="renderCatalog()"/>
+<input id="search" placeholder="Suche..." oninput="render()">
 
-<div id="catalogList"></div>
+<div id="list"></div>
 
 <button onclick="exportData()">Export</button>
-<input type="file" id="importFile" onchange="importData()"/>
+<input type="file" id="importFile" onchange="importData()">
 
 </div>
 
-<!-- OUTFITS -->
-<div id="outfits" class="panel">
+<div id="out" class="panel">
 
-<select id="style">
-<option>dark</option>
-<option>clean</option>
-<option>sexy</option>
-</select>
+<button onclick="outfit()">Outfit generieren</button>
 
-<button class="main" onclick="generate()">Outfits erzeugen</button>
-
-<div id="outfitList"></div>
+<div id="outfit"></div>
 
 </div>
 
 <script>
 
 let current=null;
+const KEY="data_v2";
 
-function setTab(t){
-document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"))
+function tab(t){
+["scan","cat","out"].forEach(id=>document.getElementById(id).classList.remove("active"))
 document.getElementById(t).classList.add("active")
 
-document.querySelectorAll(".tabbar button").forEach(b=>b.classList.remove("active"))
+document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"))
 document.getElementById("t-"+t).classList.add("active")
 }
 
-const STORAGE="items_v1"
-
-function load(){
-return JSON.parse(localStorage.getItem(STORAGE)||"[]")
-}
-
-function save(data){
-localStorage.setItem(STORAGE,JSON.stringify(data))
-}
-
-fileInput.onchange=()=>{
-preview.src=URL.createObjectURL(fileInput.files[0])
+file.onchange=()=>{
+preview.src=URL.createObjectURL(file.files[0])
 }
 
 async function analyze(){
+const f=file.files[0];
+if(!f)return;
 
-const file=fileInput.files[0]
-if(!file)return
-
-const r=new FileReader()
+const r=new FileReader();
 
 r.onloadend=async()=>{
-
 const res=await fetch("/.netlify/functions/analyze-garment",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({imageDataUrl:r.result})
-})
+});
 
-const data=await res.json()
-current=data.analysis
+const d=await res.json();
+current=d.analysis;
 
 result.innerHTML=`
 <div class="card">
 <b>${current.suggestedName}</b>
 <div class="small">${current.category}</div>
-
-<div class="grid">
 <div>${current.color}</div>
-<div>${current.materialHints.join(",")}</div>
-<div>${current.styleTags.join(",")}</div>
-<div>${current.occasionFit.join(",")}</div>
-</div>
-</div>
-`
-
+</div>`;
 }
 
-r.readAsDataURL(file)
+r.readAsDataURL(f);
 }
 
-function saveItem(){
+function load(){return JSON.parse(localStorage.getItem(KEY)||"[]")}
+function saveData(d){localStorage.setItem(KEY,JSON.stringify(d))}
 
-if(!current)return
+function save(){
+if(!current)return;
 
-const items=load()
+const data=load();
 
-items.unshift({
-...current,
-img:preview.src,
-id:Date.now(),
-fav:false
-})
+data.unshift({...current,img:preview.src,id:Date.now()});
 
-save(items)
-renderCatalog()
-
+saveData(data);
+render();
 }
 
-function renderCatalog(){
+function render(){
+const q=search.value.toLowerCase();
 
-const q=search.value.toLowerCase()
-
-const items=load().filter(i=>
-!q || i.suggestedName.toLowerCase().includes(q)
-)
-
-catalogList.innerHTML=items.map(i=>`
+list.innerHTML=load().filter(i=>!q||i.suggestedName.toLowerCase().includes(q))
+.map(i=>`
 <div class="card">
-
-<img src="${i.img}"/>
-
+<img src="${i.img}">
 <b>${i.suggestedName}</b>
-
-<div class="small">${i.category}</div>
-
-<div>
-<button onclick="fav(${i.id})">★</button>
-<button onclick="del(${i.id})">X</button>
-</div>
-
-</div>
-`).join("")
-}
-
-function fav(id){
-const items=load().map(i=>i.id==id?{...i,fav:!i.fav}:i)
-save(items)
-renderCatalog()
+<button onclick="del(${i.id})">Löschen</button>
+</div>`).join("");
 }
 
 function del(id){
-const items=load().filter(i=>i.id!=id)
-save(items)
-renderCatalog()
+saveData(load().filter(i=>i.id!=id));
+render();
 }
 
-function generate(){
+function outfit(){
+const data=load();
 
-const items=load()
+const top=data.find(i=>i.category=="top");
+const bottom=data.find(i=>i.category=="bottom");
+const shoes=data.find(i=>i.category=="shoes");
 
-const top=items.find(i=>i.category=="top")
-const bottom=items.find(i=>i.category=="bottom")
-const shoes=items.find(i=>i.category=="shoes")
-
-outfitList.innerHTML=`
+outfit.innerHTML=`
 <div class="card">
-<b>Outfit</b>
-<img src="${top?.img||""}">
-<img src="${bottom?.img||""}">
-<img src="${shoes?.img||""}">
+<b>Outfit Vorschau</b>
+
+<div class="silhouette">
+${top?`<img class="layer top" src="${top.img}">`:""}
+${bottom?`<img class="layer bottom" src="${bottom.img}">`:""}
+${shoes?`<img class="layer shoes" src="${shoes.img}">`:""}
 </div>
-`
+
+</div>`;
 }
 
 function exportData(){
-const blob=new Blob([JSON.stringify(load())])
-const a=document.createElement("a")
-a.href=URL.createObjectURL(blob)
-a.download="data.json"
-a.click()
+const blob=new Blob([JSON.stringify(load())]);
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="outfit.json";
+a.click();
 }
 
 function importData(){
-const f=importFile.files[0]
-const r=new FileReader()
-r.onload=()=>{
-save(JSON.parse(r.result))
-renderCatalog()
-}
-r.readAsText(f)
+const r=new FileReader();
+r.onload=()=>{saveData(JSON.parse(r.result));render();}
+r.readAsText(importFile.files[0]);
 }
 
-renderCatalog()
+render();
 
 </script>
+
 </body>
 </html>
