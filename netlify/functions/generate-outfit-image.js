@@ -1,161 +1,108 @@
 export async function handler(event) {
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Method not allowed" })
-    };
-  }
-
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return {
-        statusCode: 500,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ error: "OPENAI_API_KEY fehlt." })
-      };
-    }
+    const { items } = JSON.parse(event.body || "{}");
 
-    const { items, style, occasion, warmth, extra } = JSON.parse(event.body || "{}");
-
-    if (!Array.isArray(items) || !items.length) {
+    if (!items || !items.length) {
       return {
         statusCode: 400,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ error: "Keine Outfit-Items übergeben." })
+        body: JSON.stringify({ error: "Keine Items" })
       };
     }
 
-    const usableItems = items
-      .filter(i => i && typeof i.imageDataUrl === "string" && i.imageDataUrl.startsWith("data:image/"))
-      .slice(0, 8);
+    // Nur Bilder nehmen, die existieren
+    const validItems = items
+      .filter(i => i.img && i.img.startsWith("data:image"))
+      .slice(0, 6);
 
-    if (!usableItems.length) {
-      return {
-        statusCode: 400,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ error: "Keine gültigen Referenzbilder gefunden." })
-      };
-    }
-
-    const itemLines = usableItems.map((item, idx) => {
-      const name = item.name || "item";
-      const category = item.category || "unknown";
-      const subcategory = item.subcategory || "";
-      const color = item.color || "";
-      return `${idx + 1}. ${name} | category: ${category} | subcategory: ${subcategory} | color: ${color}`;
+    const garmentList = validItems.map((item, i) => {
+      return `${i + 1}. ${item.suggestedName || "garment"} (${item.category || ""}, ${item.color || ""})`;
     }).join("\n");
 
+    // 🔥 WICHTIG: extrem klare Bildanweisung
     const prompt = `
-Create ONE full-body outfit image on a clean mannequin.
+Create a FULL BODY fashion mannequin image.
 
-Use the uploaded clothing reference images as the basis for the outfit.
-Stay visually close to the referenced garments in color, silhouette, and styling.
-Do NOT create a face.
-Do NOT create a realistic human person.
-Use a clean mannequin / dress form aesthetic.
-Neutral studio background.
-Editorial fashion product look.
-Minimal, dark, clean, industrial mood.
+STRICT RULES:
+- The ENTIRE mannequin must be visible from head to feet.
+- Include head shape (no face details), neck, shoulders.
+- Include ears so earrings are visible.
+- Include legs and FULL feet so shoes are visible.
+- DO NOT crop anything.
+- The mannequin must be centered and fully inside frame.
 
-Outfit intent:
-- Occasion: ${occasion || "alltag"}
-- Style: ${style || "dark"}
-- Warmth: ${warmth || "medium"}
-- Extra wishes: ${extra || "none"}
+STYLE:
+- clean fashion studio
+- neutral background (light gray or white)
+- no environment
+- no props
+- no shadows cutting off feet
 
-Layering is very important.
-Allowed layering:
-- up to 3 upper body layers
-- up to 3 legwear layers
-- up to 4 accessories
+OUTFIT:
+Use these garments as inspiration:
+${garmentList}
 
-Reference garments:
-${itemLines}
+RULES:
+- Build a realistic layered outfit
+- Max 3 upper layers
+- Max 3 legwear layers
+- Max 4 accessories
+- Respect proportions
+- Dark, industrial, clean styling
 
-Rules:
-- Build a coherent, wearable layered outfit.
-- Prefer dark, clean, styled combinations.
-- If legwear is provided, use it meaningfully.
-- If accessories are provided, include them subtly but visibly.
-- Keep the mannequin centered and full-body visible.
-- Show shoes clearly.
-- Output one clean finished fashion image only.
-    `.trim();
+OUTPUT:
+One single image.
+    `;
 
     const form = new FormData();
+
     form.append("model", "gpt-image-1-mini");
     form.append("prompt", prompt);
-    form.append("size", "1024x1024");
+
+    // 🔥 PORTRAIT FORMAT → verhindert abgeschnittene Füße
+    form.append("size", "1024x1536");
+
     form.append("quality", "low");
     form.append("output_format", "png");
-    form.append("background", "opaque");
 
-    for (let idx = 0; idx < usableItems.length; idx++) {
-      const imageDataUrl = usableItems[idx].imageDataUrl;
-      const match = imageDataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-
-      if (!match) continue;
-
-      const mimeType = match[1];
-      const base64 = match[2];
+    // Referenzbilder anhängen
+    validItems.forEach((item, index) => {
+      const base64 = item.img.split(",")[1];
       const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-      const ext =
-        mimeType.includes("png") ? "png" :
-        mimeType.includes("webp") ? "webp" :
-        "jpg";
+      const blob = new Blob([bytes], { type: "image/png" });
 
-      const blob = new Blob([bytes], { type: mimeType });
-      form.append("image[]", blob, `reference_${idx + 1}.${ext}`);
-    }
+      form.append("image[]", blob, `item_${index}.png`);
+    });
 
     const response = await fetch("https://api.openai.com/v1/images/edits", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: form
     });
 
-    const raw = await response.json();
+    const data = await response.json();
 
     if (!response.ok) {
       return {
-        statusCode: response.status,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          error: raw?.error?.message || "Bildgenerierung fehlgeschlagen.",
-          raw
-        })
+        statusCode: 500,
+        body: JSON.stringify(data)
       };
     }
 
-    const b64 = raw?.data?.[0]?.b64_json;
-    if (!b64) {
-      return {
-        statusCode: 500,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          error: "Kein Bild in der Antwort erhalten.",
-          raw
-        })
-      };
-    }
+    const image = data.data?.[0]?.b64_json;
 
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        image: `data:image/png;base64,${b64}`
+        image: `data:image/png;base64,${image}`
       })
     };
+
   } catch (err) {
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        error: err.message || "Unbekannter Fehler."
-      })
+      body: JSON.stringify({ error: err.message })
     };
   }
 }
