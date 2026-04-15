@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outfitfinder V2</title>
+  <style>
+    :root{
+      --bg:#020617;
+      --panel:#0f172a;
+      --card:#08101f;
+      --line:#1e293b;
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --accent:#22c55e;
+      --accent2:#34d399;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      padding:12px;
+    }
+
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+    }
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    .tabs button{
+      flex:1;
+      padding:12px;
+      border:none;
+      border-radius:14px;
+      background:#111827;
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .tabs button.active{
+      background:linear-gradient(180deg,var(--accent2),var(--accent));
+      color:#04130a;
+    }
+
+    .panel{
+      display:none;
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+
+    .panel.active{display:block}
+
+    h1,h2,h3,p{margin:0}
+
+    .lead{
+      color:var(--muted);
+      margin-top:8px;
+      margin-bottom:14px;
+      line-height:1.45;
+    }
+
+    input[type="file"],input[type="text"],select{
+      width:100%;
+      background:#08101f;
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px;
+      margin:8px 0 12px;
+    }
+
+    button{
+      width:100%;
+      border:none;
+      border-radius:12px;
+      padding:13px 16px;
+      font-weight:800;
+      cursor:pointer;
+      background:linear-gradient(180deg,var(--accent2),var(--accent));
+      color:#04130a;
+    }
+
+    button.secondary{
+      background:#111827;
+      color:#fff;
+      border:1px solid var(--line);
+    }
+
+    button.danger{
+      background:rgba(239,68,68,.14);
+      color:#fecaca;
+      border:1px solid rgba(239,68,68,.35);
+    }
+
+    button.small{
+      width:auto;
+      padding:8px 12px;
+      font-size:.86rem;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .actions > *{
+      flex:1;
+      min-width:150px;
+    }
+
+    .status{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:.93rem;
+    }
+
+    .error-box,.ok-box{
+      margin-top:10px;
+      border-radius:12px;
+      padding:12px;
+      display:none;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .error-box{
+      background:rgba(239,68,68,.12);
+      border:1px solid rgba(239,68,68,.35);
+      color:#fecaca;
+    }
+
+    .ok-box{
+      background:rgba(52,211,153,.12);
+      border:1px solid rgba(52,211,153,.35);
+      color:#bbf7d0;
+    }
+
+    .scan-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .scan-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    .scan-thumb{
+      width:100%;
+      border-radius:12px;
+      background:#fff;
+      border:1px solid var(--line);
+      display:block;
+      margin-bottom:12px;
+      object-fit:contain;
+      max-height:420px;
+    }
+
+    .scan-state{
+      font-size:.92rem;
+      margin-bottom:8px;
+      font-weight:700;
+    }
+
+    .scan-state.pending{color:var(--muted)}
+    .scan-state.loading{color:#fde68a}
+    .scan-state.ok{color:#bbf7d0}
+    .scan-state.err{color:#fecaca}
+
+    .badge-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:10px 0;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#111827;
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:.82rem;
+    }
+
+    .badge.category{
+      background:var(--accent);
+      color:#04130a;
+      border:none;
+      font-weight:800;
+    }
+
+    .meta-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin:10px 0 12px;
+    }
+
+    .meta-box{
+      background:#0b1220;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      min-height:66px;
+    }
+
+    .meta-box strong{
+      display:block;
+      margin-bottom:4px;
+      font-size:.92rem;
+    }
+
+    .meta-box span{
+      color:var(--muted);
+      line-height:1.35;
+      word-break:break-word;
+    }
+
+    .catalog-list,.outfit-list{
+      display:grid;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .catalog-item,.outfit-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:12px;
+    }
+
+    .catalog-top{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+    }
+
+    .catalog-thumb{
+      width:110px;
+      height:110px;
+      object-fit:cover;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      flex-shrink:0;
+    }
+
+    .catalog-content{
+      flex:1;
+      min-width:0;
+    }
+
+    .catalog-content h3{
+      margin-bottom:8px;
+      font-size:1rem;
+      line-height:1.25;
+    }
+
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      border:1px dashed var(--line);
+      border-radius:16px;
+      padding:18px;
+      background:#08101f;
+    }
+
+    .outfit-layout{
+      display:grid;
+      grid-template-columns:360px 1fr;
+      gap:14px;
+      align-items:start;
+    }
+
+    .silhouette{
+      position:relative;
+      height:440px;
+      background:#0b1220;
+      border:1px solid var(--line);
+      border-radius:16px;
+      overflow:hidden;
+    }
+
+    .figure{
+      position:absolute;
+      inset:0;
+    }
+
+    .figure .head,
+    .figure .torso,
+    .figure .hip,
+    .figure .legL,
+    .figure .legR,
+    .figure .armL,
+    .figure .armR{
+      position:absolute;
+      background:#243247;
+      opacity:.95;
+    }
+
+    .figure .head{
+      width:54px;height:54px;border-radius:999px;left:50%;top:20px;transform:translateX(-50%);
+    }
+
+    .figure .torso{
+      width:96px;height:116px;left:50%;top:82px;transform:translateX(-50%);border-radius:26px;
+    }
+
+    .figure .hip{
+      width:92px;height:42px;left:50%;top:188px;transform:translateX(-50%);border-radius:18px;
+    }
+
+    .figure .legL,.figure .legR{
+      width:26px;height:150px;top:220px;border-radius:999px;
+    }
+
+    .figure .legL{left:calc(50% - 34px)}
+    .figure .legR{left:calc(50% + 8px)}
+
+    .figure .armL,.figure .armR{
+      width:20px;height:108px;top:92px;border-radius:999px;
+    }
+
+    .figure .armL{left:calc(50% - 62px);transform:rotate(8deg)}
+    .figure .armR{left:calc(50% + 42px);transform:rotate(-8deg)}
+
+    .layer{
+      position:absolute;
+      object-fit:contain;
+      filter:drop-shadow(0 8px 18px rgba(0,0,0,.35));
+    }
+
+    /* deutlich bessere Platzierung */
+    .layer.top{
+      left:50%;
+      top:82px;
+      transform:translateX(-50%);
+      width:136px;
+      height:128px;
+    }
+
+    .layer.bottom{
+      left:50%;
+      top:188px;
+      transform:translateX(-50%);
+      width:150px;
+      height:150px;
+    }
+
+    .layer.dress{
+      left:50%;
+      top:82px;
+      transform:translateX(-50%);
+      width:170px;
+      height:250px;
+    }
+
+    .layer.shoesL{
+      top:360px;
+      left:calc(50% - 42px);
+      width:42px;
+      height:34px;
+    }
+
+    .layer.shoesR{
+      top:360px;
+      left:calc(50% + 2px);
+      width:42px;
+      height:34px;
+    }
+
+    .outfit-meta{
+      display:grid;
+      gap:10px;
+    }
+
+    .piece-card{
+      background:#0b1220;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+    }
+
+    .piece-card strong{
+      display:block;
+      margin-bottom:4px;
+    }
+
+    .score{
+      color:#bbf7d0;
+      font-weight:800;
+      margin-top:8px;
+    }
+
+    @media (min-width:760px){
+      .scan-grid{grid-template-columns:1fr 1fr}
+    }
+
+    @media (max-width:900px){
+      .outfit-layout{grid-template-columns:1fr}
+    }
+
+    @media (max-width:640px){
+      .meta-grid{grid-template-columns:1fr}
+      .catalog-top{flex-direction:column}
+      .catalog-thumb{
+        width:100%;
+        height:auto;
+        aspect-ratio:1/1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="tabs">
+      <button class="active" id="tab-scan" onclick="setTab('scan')">Scan</button>
+      <button id="tab-catalog" onclick="setTab('catalog')">Katalog</button>
+      <button id="tab-outfits" onclick="setTab('outfits')">Outfits</button>
+    </div>
+
+    <div class="panel active" id="panel-scan">
+      <h1>Outfitfinder V2</h1>
+      <p class="lead">Mehrere Bilder auswählen, einzeln oder gesammelt analysieren und anschließend sauber speichern.</p>
+
+      <input type="file" id="fileInput" accept="image/*" multiple />
+
+      <div class="actions">
+        <button id="analyzeBtn" onclick="analyzeAll()">Alle analysieren</button>
+        <button class="secondary" onclick="saveAllAnalyzed()">Alle analysierten speichern</button>
+        <button class="secondary" onclick="clearBatch()">Zurücksetzen</button>
+      </div>
+
+      <div class="status" id="statusText">Bereit.</div>
+      <div class="error-box" id="errorBox"></div>
+      <div class="ok-box" id="okBox"></div>
+
+      <div id="scanGrid" class="scan-grid"></div>
+    </div>
+
+    <div class="panel" id="panel-catalog">
+      <input type="text" id="searchInput" placeholder="Suche..." oninput="renderCatalog()" />
+
+      <div class="actions">
+        <button class="secondary" onclick="exportData()">Export</button>
+        <button class="secondary" onclick="document.getElementById('importFile').click()">Import</button>
+        <button class="danger" onclick="clearCatalog()">Alles löschen</button>
+      </div>
+
+      <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData()" />
+
+      <div id="catalogList" class="catalog-list"></div>
+    </div>
+
+    <div class="panel" id="panel-outfits">
+      <div class="actions">
+        <button onclick="generateOutfits()">3 Outfits erzeugen</button>
+      </div>
+      <div id="outfitList" class="outfit-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "outfitfinder_items_v2";
+    let batchItems = [];
+    let generatedLooks = [];
+
+    function setTab(name) {
+      ["scan", "catalog", "outfits"].forEach(id => {
+        document.getElementById("panel-" + id).classList.remove("active");
+        document.getElementById("tab-" + id).classList.remove("active");
+      });
+      document.getElementById("panel-" + name).classList.add("active");
+      document.getElementById("tab-" + name).classList.add("active");
+    }
+
+    function uid() {
+      return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    function loadItems() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveItems(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function showError(msg) {
+      const box = document.getElementById("errorBox");
+      box.style.display = "block";
+      box.textContent = msg;
+    }
+
+    function hideError() {
+      const box = document.getElementById("errorBox");
+      box.style.display = "none";
+      box.textContent = "";
+    }
+
+    function showOk(msg) {
+      const box = document.getElementById("okBox");
+      box.style.display = "block";
+      box.textContent = msg;
+    }
+
+    function hideOk() {
+      const box = document.getElementById("okBox");
+      box.style.display = "none";
+      box.textContent = "";
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Datei konnte nicht gelesen werden."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    document.getElementById("fileInput").addEventListener("change", (e) => {
+      hideError();
+      hideOk();
+
+      const files = Array.from(e.target.files || []);
+      batchItems = files.map(file => ({
+        id: uid(),
+        file,
+        previewUrl: URL.createObjectURL(file),
+        state: "pending",
+        error: "",
+        analysis: null,
+        saved: false,
+        imageDataUrl: null
+      }));
+
+      renderBatch();
+      document.getElementById("statusText").textContent = files.length
+        ? `${files.length} Bild(er) geladen.`
+        : "Bereit.";
+    });
+
+    function clearBatch() {
+      batchItems = [];
+      document.getElementById("fileInput").value = "";
+      document.getElementById("scanGrid").innerHTML = '<div class="empty">Noch keine Bilder ausgewählt.</div>';
+      document.getElementById("statusText").textContent = "Bereit.";
+      hideError();
+      hideOk();
+    }
+
+    function stateText(state, saved) {
+      if (saved) return "Gespeichert";
+      if (state === "pending") return "Noch nicht analysiert";
+      if (state === "loading") return "Analysiere...";
+      if (state === "success") return "Analyse erfolgreich";
+      return "Analyse fehlgeschlagen";
+    }
+
+    function stateClass(state) {
+      if (state === "pending") return "pending";
+      if (state === "loading") return "loading";
+      if (state === "success") return "ok";
+      return "err";
+    }
+
+    function renderAnalysisCard(a) {
+      return `
+        <div class="badge-row">
+          <span class="badge category">${escapeHtml(a.category || "-")}</span>
+          <span class="badge">${escapeHtml(a.suggestedName || "Unbenannt")}</span>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-box"><strong>Farbe</strong><span>${escapeHtml(a.color || "-")}</span></div>
+          <div class="meta-box"><strong>Material</strong><span>${escapeHtml((a.materialHints || []).join(", ") || "-")}</span></div>
+          <div class="meta-box"><strong>Style</strong><span>${escapeHtml((a.styleTags || []).join(", ") || "-")}</span></div>
+          <div class="meta-box"><strong>Anlass</strong><span>${escapeHtml((a.occasionFit || []).join(", ") || "-")}</span></div>
+          <div class="meta-box"><strong>Exposure</strong><span>${escapeHtml(a.exposure || "-")}</span></div>
+          <div class="meta-box"><strong>Confidence</strong><span>${Math.round((a.confidence || 0) * 100)}%</span></div>
+        </div>
+      `;
+    }
+
+    function renderBatch() {
+      const grid = document.getElementById("scanGrid");
+
+      if (!batchItems.length) {
+        grid.innerHTML = '<div class="empty">Noch keine Bilder ausgewählt.</div>';
+        return;
+      }
+
+      grid.innerHTML = batchItems.map(item => `
+        <div class="scan-card">
+          <img class="scan-thumb" src="${item.previewUrl}" alt="Preview" />
+          <div class="scan-state ${stateClass(item.state)}">${stateText(item.state, item.saved)}</div>
+          ${item.analysis ? renderAnalysisCard(item.analysis) : ""}
+          ${item.error ? `<div class="error-box" style="display:block;">${escapeHtml(item.error)}</div>` : ""}
+          <div class="actions">
+            <button class="secondary" onclick="analyzeOne('${item.id}')">Einzeln analysieren</button>
+            <button class="secondary" onclick="saveOne('${item.id}')">Dieses speichern</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function analyzeOne(id) {
+      const item = batchItems.find(x => x.id === id);
+      if (!item) return;
+
+      item.state = "loading";
+      item.error = "";
+      renderBatch();
+
+      try {
+        item.imageDataUrl = await fileToDataUrl(item.file);
+
+        const res = await fetch("/.netlify/functions/analyze-garment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageDataUrl: item.imageDataUrl })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || "Analyse fehlgeschlagen.");
+        if (!data.analysis) throw new Error("Keine Analyse-Daten erhalten.");
+
+        item.analysis = data.analysis;
+        item.state = "success";
+      } catch (err) {
+        item.analysis = null;
+        item.state = "error";
+        item.error = err.message || "Unbekannter Fehler.";
+      }
+
+      renderBatch();
+    }
+
+    async function analyzeAll() {
+      hideError();
+      hideOk();
+
+      if (!batchItems.length) {
+        showError("Bitte zuerst ein oder mehrere Bilder auswählen.");
+        return;
+      }
+
+      document.getElementById("analyzeBtn").disabled = true;
+      document.getElementById("statusText").textContent = "Analysiere Bilder...";
+
+      for (const item of batchItems) {
+        if (item.state !== "success") {
+          await analyzeOne(item.id);
+        }
+      }
+
+      document.getElementById("analyzeBtn").disabled = false;
+      document.getElementById("statusText").textContent = "Analyse abgeschlossen.";
+    }
+
+    function saveOne(id) {
+      hideError();
+      hideOk();
+
+      const item = batchItems.find(x => x.id === id);
+      if (!item || !item.analysis || !item.imageDataUrl) {
+        showError("Dieses Bild wurde noch nicht erfolgreich analysiert.");
+        return;
+      }
+
+      const items = loadItems();
+      items.unshift({
+        id: uid(),
+        ...item.analysis,
+        favorite: false,
+        img: item.imageDataUrl
+      });
+      saveItems(items);
+
+      item.saved = true;
+      renderBatch();
+      renderCatalog();
+      showOk("Teil gespeichert.");
+    }
+
+    function saveAllAnalyzed() {
+      hideError();
+      hideOk();
+
+      const valid = batchItems.filter(item => item.analysis && item.imageDataUrl && !item.saved);
+      if (!valid.length) {
+        showError("Es gibt keine neu analysierten Teile zum Speichern.");
+        return;
+      }
+
+      const items = loadItems();
+      valid.forEach(item => {
+        items.unshift({
+          id: uid(),
+          ...item.analysis,
+          favorite: false,
+          img: item.imageDataUrl
+        });
+        item.saved = true;
+      });
+
+      saveItems(items);
+      renderBatch();
+      renderCatalog();
+      showOk(`${valid.length} Teil(e) gespeichert.`);
+    }
+
+    function toggleFavorite(id) {
+      const items = loadItems().map(item =>
+        item.id === id ? { ...item, favorite: !item.favorite } : item
+      );
+      saveItems(items);
+      renderCatalog();
+    }
+
+    function renderCatalog() {
+      const q = (document.getElementById("searchInput").value || "").toLowerCase();
+
+      const items = loadItems().filter(i =>
+        !q ||
+        (i.suggestedName || "").toLowerCase().includes(q) ||
+        (i.color || "").toLowerCase().includes(q) ||
+        (i.category || "").toLowerCase().includes(q) ||
+        (i.styleTags || []).join(" ").toLowerCase().includes(q)
+      );
+
+      const list = document.getElementById("catalogList");
+
+      if (!items.length) {
+        list.innerHTML = '<div class="empty">Noch keine gespeicherten Teile.</div>';
+        return;
+      }
+
+      list.innerHTML = items.map(i => `
+        <div class="catalog-item">
+          <div class="catalog-top">
+            <img class="catalog-thumb" src="${i.img}" alt="${escapeHtml(i.suggestedName)}" />
+            <div class="catalog-content">
+              <h3>${escapeHtml(i.suggestedName || "Unbenannt")}</h3>
+              <div class="badge-row">
+                <span class="badge category">${escapeHtml(i.category || "-")}</span>
+                <span class="badge">${escapeHtml(i.color || "-")}</span>
+                ${i.favorite ? `<span class="badge">★ Favorit</span>` : ""}
+              </div>
+              <div class="badge-row">
+                <span class="badge">${escapeHtml((i.styleTags || []).join(", ") || "-")}</span>
+                <span class="badge">${escapeHtml((i.materialHints || []).join(", ") || "-")}</span>
+              </div>
+              <div class="actions">
+                <button class="small secondary" onclick="toggleFavorite('${i.id}')">${i.favorite ? "Favorit entfernen" : "Favorit"}</button>
+                <button class="small danger" onclick="deleteItem('${i.id}')">Löschen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function deleteItem(id) {
+      const items = loadItems().filter(i => i.id !== id);
+      saveItems(items);
+      renderCatalog();
+    }
+
+    function clearCatalog() {
+      if (!confirm("Wirklich alle gespeicherten Teile löschen?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      renderCatalog();
+      document.getElementById("outfitList").innerHTML = '<div class="empty">Noch keine Outfits erzeugt.</div>';
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(loadItems(), null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "outfitfinder-katalog.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function importData() {
+      const f = document.getElementById("importFile").files[0];
+      if (!f) return;
+
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const parsed = JSON.parse(r.result);
+          if (!Array.isArray(parsed)) throw new Error("Ungültige Datei.");
+          saveItems(parsed);
+          renderCatalog();
+          showOk("Import erfolgreich.");
+        } catch (err) {
+          showError("Import fehlgeschlagen: " + err.message);
+        }
+      };
+      r.readAsText(f);
+    }
+
+    function scoreItem(item, usedIds) {
+      let score = 0;
+      if (item.favorite) score += 3;
+      score += (item.confidence || 0) * 2;
+      if (!usedIds.has(item.id)) score += 2;
+      return score;
+    }
+
+    function bestCandidate(items, category, usedIds) {
+      const filtered = items
+        .filter(i => i.category === category)
+        .map(i => ({ item: i, score: scoreItem(i, usedIds) }))
+        .sort((a, b) => b.score - a.score);
+
+      return filtered[0]?.item || null;
+    }
+
+    function rotatePick(items, category, offset) {
+      const filtered = items.filter(i => i.category === category);
+      if (!filtered.length) return null;
+      return filtered[offset % filtered.length];
+    }
+
+    function renderOutfitCard(look, index) {
+      const useDress = !!look.dress;
+
+      return `
+        <div class="outfit-card">
+          <h3>Outfit ${index + 1}</h3>
+          <div class="outfit-layout">
+            <div class="silhouette">
+              <div class="figure">
+                <div class="head"></div>
+                <div class="torso"></div>
+                <div class="hip"></div>
+                <div class="legL"></div>
+                <div class="legR"></div>
+                <div class="armL"></div>
+                <div class="armR"></div>
+
+                ${useDress ? `<img class="layer dress" src="${look.dress.img}" alt="">` : ""}
+                ${!useDress && look.top ? `<img class="layer top" src="${look.top.img}" alt="">` : ""}
+                ${!useDress && look.bottom ? `<img class="layer bottom" src="${look.bottom.img}" alt="">` : ""}
+                ${look.shoes ? `<img class="layer shoesL" src="${look.shoes.img}" alt=""><img class="layer shoesR" src="${look.shoes.img}" alt="">` : ""}
+              </div>
+            </div>
+
+            <div class="outfit-meta">
+              <div class="meta-box">
+                <strong>Top</strong>
+                <span>${look.top ? escapeHtml(look.top.suggestedName) : "-"}</span>
+              </div>
+              <div class="meta-box">
+                <strong>Bottom</strong>
+                <span>${look.bottom ? escapeHtml(look.bottom.suggestedName) : "-"}</span>
+              </div>
+              <div class="meta-box">
+                <strong>Dress</strong>
+                <span>${look.dress ? escapeHtml(look.dress.suggestedName) : "-"}</span>
+              </div>
+              <div class="meta-box">
+                <strong>Schuhe</strong>
+                <span>${look.shoes ? escapeHtml(look.shoes.suggestedName) : "-"}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function generateOutfits() {
+      const items = loadItems();
+      if (!items.length) {
+        document.getElementById("outfitList").innerHTML = '<div class="empty">Speichere zuerst ein paar Teile im Katalog.</div>';
+        return;
+      }
+
+      generatedLooks = [];
+
+      for (let i = 0; i < 3; i++) {
+        const top = rotatePick(items, "top", i);
+        const bottom = rotatePick(items, "bottom", i);
+        const dress = rotatePick(items, "dress", i);
+        const shoes = rotatePick(items, "shoes", i);
+
+        const useDress = !!dress && (i === 2 || (!top || !bottom));
+
+        generatedLooks.push({
+          top: useDress ? null : top,
+          bottom: useDress ? null : bottom,
+          dress: useDress ? dress : null,
+          shoes
+        });
+      }
+
+      document.getElementById("outfitList").innerHTML = generatedLooks
+        .map((look, i) => renderOutfitCard(look, i))
+        .join("");
+    }
+
+    renderCatalog();
+    document.getElementById("scanGrid").innerHTML = '<div class="empty">Noch keine Bilder ausgewählt.</div>';
+    document.getElementById("outfitList").innerHTML = '<div class="empty">Noch keine Outfits erzeugt.</div>';
+  </script>
+</body>
+</html>
