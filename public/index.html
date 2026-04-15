@@ -7,257 +7,475 @@
 
 <style>
 :root{
---bg:#020617;
---panel:#0f172a;
---line:#1e293b;
---text:#f8fafc;
---muted:#94a3b8;
---accent:#22c55e;
---danger:#ef4444;
+  --bg:#020617;
+  --panel:#0f172a;
+  --line:#1e293b;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --accent:#22c55e;
+  --danger:#ef4444;
 }
-
+*{box-sizing:border-box}
 body{
-margin:0;
-font-family:system-ui;
-background:var(--bg);
-color:var(--text);
-padding:12px;
+  margin:0;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  padding:12px;
 }
-
 .tabs{
-display:flex;
-gap:6px;
-margin-bottom:10px;
+  display:flex;
+  gap:6px;
+  margin-bottom:10px;
 }
-
 .tabs button{
-flex:1;
-padding:12px;
-border-radius:10px;
-border:none;
-background:#111827;
-color:white;
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  background:#111827;
+  color:white;
+  font-weight:700;
 }
-
 .tabs .active{
-background:var(--accent);
-color:black;
-font-weight:bold;
+  background:var(--accent);
+  color:black;
 }
-
-.panel{display:none;background:var(--panel);padding:12px;border-radius:12px;}
-.panel.active{display:block;}
-
+.panel{
+  display:none;
+  background:var(--panel);
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+}
+.panel.active{display:block}
 input,select{
-width:100%;
-margin:8px 0;
-padding:10px;
-border-radius:10px;
-border:1px solid var(--line);
-background:#020617;
-color:white;
+  width:100%;
+  margin:8px 0;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:#020617;
+  color:white;
 }
-
 button{
-padding:12px;
-border:none;
-border-radius:10px;
-background:var(--accent);
-color:black;
-font-weight:bold;
-width:100%;
-margin-top:6px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:var(--accent);
+  color:black;
+  font-weight:bold;
+  width:100%;
+  margin-top:6px;
+  cursor:pointer;
 }
-
+button.secondary{
+  background:#111827;
+  color:white;
+  border:1px solid var(--line);
+}
 img{
-width:100%;
-border-radius:10px;
-margin-top:10px;
+  width:100%;
+  border-radius:10px;
+  margin-top:10px;
 }
-
 .card{
-background:#020617;
-border:1px solid var(--line);
-padding:10px;
-border-radius:10px;
-margin-top:10px;
+  background:#020617;
+  border:1px solid var(--line);
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
 }
-
 .silhouette{
-position:relative;
-height:300px;
-background:#08101f;
-border-radius:12px;
-margin-top:10px;
+  position:relative;
+  height:320px;
+  background:#08101f;
+  border-radius:12px;
+  margin-top:10px;
+  border:1px solid var(--line);
 }
+.figure{
+  position:absolute;
+  inset:0;
+}
+.figure .head,
+.figure .torso,
+.figure .hip,
+.figure .legL,
+.figure .legR,
+.figure .armL,
+.figure .armR{
+  position:absolute;
+  background:#1f2937;
+  opacity:.95;
+}
+.figure .head{
+  width:44px;height:44px;border-radius:999px;left:50%;top:18px;transform:translateX(-50%);
+}
+.figure .torso{
+  width:78px;height:92px;left:50%;top:68px;transform:translateX(-50%);border-radius:24px;
+}
+.figure .hip{
+  width:74px;height:34px;left:50%;top:150px;transform:translateX(-50%);border-radius:18px;
+}
+.figure .legL,.figure .legR{
+  width:24px;height:108px;top:176px;border-radius:999px;
+}
+.figure .legL{left:calc(50% - 30px)}
+.figure .legR{left:calc(50% + 6px)}
+.figure .armL,.figure .armR{
+  width:18px;height:90px;top:78px;border-radius:999px;
+}
+.figure .armL{left:calc(50% - 52px);transform:rotate(8deg)}
+.figure .armR{left:calc(50% + 34px);transform:rotate(-8deg)}
 
 .layer{
-position:absolute;
-width:80px;
-left:50%;
-transform:translateX(-50%);
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  object-fit:cover;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 6px 18px rgba(0,0,0,.28);
 }
+.layer.top{top:68px;width:92px;height:90px}
+.layer.bottom{top:154px;width:86px;height:92px}
+.layer.dress{top:68px;width:96px;height:170px}
+.layer.shoesL{top:272px;left:calc(50% - 20px);transform:none;width:30px;height:26px}
+.layer.shoesR{top:272px;left:calc(50% + 6px);transform:none;width:30px;height:26px}
 
-.top{top:60px;}
-.bottom{top:140px;}
-.shoes{top:240px;}
-
-.small{font-size:12px;color:var(--muted);}
+.small{font-size:12px;color:var(--muted)}
+.error{
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(239,68,68,.12);
+  border:1px solid rgba(239,68,68,.3);
+  color:#fecaca;
+  display:none;
+  white-space:pre-wrap;
+}
+.ok{
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+  background:rgba(34,197,94,.12);
+  border:1px solid rgba(34,197,94,.3);
+  color:#bbf7d0;
+  display:none;
+}
+.meta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+.meta div{
+  background:#0b1220;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:8px;
+}
+@media (max-width:640px){
+  .meta{grid-template-columns:1fr}
+}
 </style>
 </head>
 
 <body>
 
 <div class="tabs">
-<button class="active" onclick="tab('scan')" id="t-scan">Scan</button>
-<button onclick="tab('cat')" id="t-cat">Katalog</button>
-<button onclick="tab('out')" id="t-out">Outfits</button>
+  <button class="active" onclick="setTab('scan')" id="t-scan">Scan</button>
+  <button onclick="setTab('cat')" id="t-cat">Katalog</button>
+  <button onclick="setTab('out')" id="t-out">Outfits</button>
 </div>
 
 <div id="scan" class="panel active">
+  <input type="file" id="fileInput" accept="image/*">
+  <button onclick="analyzeCurrent()" id="analyzeBtn">Analysieren</button>
+  <button class="secondary" onclick="saveCurrentItem()">Speichern</button>
 
-<input type="file" id="file">
+  <img id="preview" style="display:none">
 
-<button onclick="analyze()">Analysieren</button>
+  <div id="status" class="small">Bereit.</div>
+  <div id="errorBox" class="error"></div>
+  <div id="okBox" class="ok"></div>
 
-<img id="preview">
-
-<div id="result"></div>
-
-<button onclick="save()">Speichern</button>
-
+  <div id="result"></div>
 </div>
 
 <div id="cat" class="panel">
-
-<input id="search" placeholder="Suche..." oninput="render()">
-
-<div id="list"></div>
-
-<button onclick="exportData()">Export</button>
-<input type="file" id="importFile" onchange="importData()">
-
+  <input id="searchInput" placeholder="Suche..." oninput="renderCatalog()">
+  <div id="catalogList"></div>
+  <button onclick="exportData()">Export</button>
+  <input type="file" id="importFile" accept="application/json" onchange="importData()">
 </div>
 
 <div id="out" class="panel">
-
-<button onclick="outfit()">Outfit generieren</button>
-
-<div id="outfit"></div>
-
+  <button onclick="generateOutfit()">Outfit generieren</button>
+  <div id="outfit"></div>
 </div>
 
 <script>
+let currentAnalysis = null;
+let currentImage = null;
+const STORAGE_KEY = "outfit_app_items_v3";
 
-let current=null;
-const KEY="data_v2";
+function setTab(t){
+  ["scan","cat","out"].forEach(id => document.getElementById(id).classList.remove("active"));
+  document.getElementById(t).classList.add("active");
 
-function tab(t){
-["scan","cat","out"].forEach(id=>document.getElementById(id).classList.remove("active"))
-document.getElementById(t).classList.add("active")
-
-document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"))
-document.getElementById("t-"+t).classList.add("active")
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+  document.getElementById("t-" + t).classList.add("active");
 }
 
-file.onchange=()=>{
-preview.src=URL.createObjectURL(file.files[0])
+function loadItems(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  }catch{
+    return [];
+  }
 }
 
-async function analyze(){
-const f=file.files[0];
-if(!f)return;
+function saveItems(items){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
 
-const r=new FileReader();
+function showError(msg){
+  const box = document.getElementById("errorBox");
+  box.style.display = "block";
+  box.textContent = msg;
+}
 
-r.onloadend=async()=>{
-const res=await fetch("/.netlify/functions/analyze-garment",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({imageDataUrl:r.result})
+function hideError(){
+  const box = document.getElementById("errorBox");
+  box.style.display = "none";
+  box.textContent = "";
+}
+
+function showOk(msg){
+  const box = document.getElementById("okBox");
+  box.style.display = "block";
+  box.textContent = msg;
+}
+
+function hideOk(){
+  const box = document.getElementById("okBox");
+  box.style.display = "none";
+  box.textContent = "";
+}
+
+document.getElementById("fileInput").addEventListener("change", () => {
+  const file = document.getElementById("fileInput").files[0];
+  const preview = document.getElementById("preview");
+  hideError();
+  hideOk();
+  currentAnalysis = null;
+  document.getElementById("result").innerHTML = "";
+
+  if(!file){
+    preview.style.display = "none";
+    preview.src = "";
+    return;
+  }
+
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = "block";
+  document.getElementById("status").textContent = "Bild geladen.";
 });
 
-const d=await res.json();
-current=d.analysis;
+async function analyzeCurrent(){
+  const file = document.getElementById("fileInput").files[0];
+  if(!file){
+    showError("Bitte zuerst ein Bild auswählen.");
+    return;
+  }
 
-result.innerHTML=`
-<div class="card">
-<b>${current.suggestedName}</b>
-<div class="small">${current.category}</div>
-<div>${current.color}</div>
-</div>`;
+  hideError();
+  hideOk();
+  document.getElementById("status").textContent = "Analysiere...";
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("analyzeBtn").disabled = true;
+
+  const reader = new FileReader();
+
+  reader.onloadend = async () => {
+    try{
+      currentImage = reader.result;
+
+      const res = await fetch("/.netlify/functions/analyze-garment", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ imageDataUrl: currentImage })
+      });
+
+      const data = await res.json();
+
+      if(!res.ok){
+        throw new Error(data.error || "Analyse fehlgeschlagen.");
+      }
+
+      if(!data.analysis){
+        throw new Error("Keine Analyse-Daten erhalten.");
+      }
+
+      currentAnalysis = data.analysis;
+      renderCurrentResult();
+      document.getElementById("status").textContent = "Analyse abgeschlossen.";
+    }catch(err){
+      currentAnalysis = null;
+      showError(err.message);
+      document.getElementById("status").textContent = "Fehler.";
+    }finally{
+      document.getElementById("analyzeBtn").disabled = false;
+    }
+  };
+
+  reader.readAsDataURL(file);
 }
 
-r.readAsDataURL(f);
+function renderCurrentResult(){
+  if(!currentAnalysis) return;
+
+  const a = currentAnalysis;
+  document.getElementById("result").innerHTML = `
+    <div class="card">
+      <h3>${a.suggestedName || "Unbenannt"}</h3>
+      <div class="small">${a.category || "-"}</div>
+
+      <div class="meta">
+        <div><strong>Farbe</strong><br>${a.color || "-"}</div>
+        <div><strong>Material</strong><br>${(a.materialHints || []).join(", ") || "-"}</div>
+        <div><strong>Style</strong><br>${(a.styleTags || []).join(", ") || "-"}</div>
+        <div><strong>Anlass</strong><br>${(a.occasionFit || []).join(", ") || "-"}</div>
+        <div><strong>Exposure</strong><br>${a.exposure || "-"}</div>
+        <div><strong>Warmth</strong><br>${a.warmth || "-"}</div>
+      </div>
+
+      <div class="small" style="margin-top:10px;">Confidence: ${Math.round((a.confidence || 0) * 100)}%</div>
+    </div>
+  `;
 }
 
-function load(){return JSON.parse(localStorage.getItem(KEY)||"[]")}
-function saveData(d){localStorage.setItem(KEY,JSON.stringify(d))}
+function saveCurrentItem(){
+  hideError();
+  hideOk();
 
-function save(){
-if(!current)return;
+  if(!currentAnalysis || !currentImage){
+    showError("Es gibt noch kein analysiertes Teil zum Speichern.");
+    return;
+  }
 
-const data=load();
+  const items = loadItems();
+  items.unshift({
+    id: Date.now(),
+    ...currentAnalysis,
+    img: currentImage
+  });
 
-data.unshift({...current,img:preview.src,id:Date.now()});
-
-saveData(data);
-render();
+  saveItems(items);
+  renderCatalog();
+  showOk("Teil gespeichert.");
+  document.getElementById("status").textContent = "Teil gespeichert.";
 }
 
-function render(){
-const q=search.value.toLowerCase();
+function renderCatalog(){
+  const q = (document.getElementById("searchInput").value || "").toLowerCase();
+  const items = loadItems().filter(i =>
+    !q ||
+    (i.suggestedName || "").toLowerCase().includes(q) ||
+    (i.color || "").toLowerCase().includes(q) ||
+    (i.category || "").toLowerCase().includes(q)
+  );
 
-list.innerHTML=load().filter(i=>!q||i.suggestedName.toLowerCase().includes(q))
-.map(i=>`
-<div class="card">
-<img src="${i.img}">
-<b>${i.suggestedName}</b>
-<button onclick="del(${i.id})">Löschen</button>
-</div>`).join("");
+  const list = document.getElementById("catalogList");
+
+  if(!items.length){
+    list.innerHTML = `<div class="card"><div class="small">Noch keine gespeicherten Teile.</div></div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(i => `
+    <div class="card">
+      <img src="${i.img}">
+      <b>${i.suggestedName || "Unbenannt"}</b>
+      <div class="small">${i.category || "-"}</div>
+      <div class="small">${i.color || "-"}</div>
+      <button onclick="deleteItem(${i.id})">Löschen</button>
+    </div>
+  `).join("");
 }
 
-function del(id){
-saveData(load().filter(i=>i.id!=id));
-render();
+function deleteItem(id){
+  const items = loadItems().filter(i => i.id !== id);
+  saveItems(items);
+  renderCatalog();
 }
 
-function outfit(){
-const data=load();
+function generateOutfit(){
+  const items = loadItems();
+  const top = items.find(i => i.category === "top");
+  const bottom = items.find(i => i.category === "bottom");
+  const dress = items.find(i => i.category === "dress");
+  const shoes = items.find(i => i.category === "shoes");
 
-const top=data.find(i=>i.category=="top");
-const bottom=data.find(i=>i.category=="bottom");
-const shoes=data.find(i=>i.category=="shoes");
+  const useDress = !!dress && (!top || !bottom);
 
-outfit.innerHTML=`
-<div class="card">
-<b>Outfit Vorschau</b>
+  document.getElementById("outfit").innerHTML = `
+    <div class="card">
+      <b>Outfit Vorschau</b>
+      <div class="silhouette">
+        <div class="figure">
+          <div class="head"></div>
+          <div class="torso"></div>
+          <div class="hip"></div>
+          <div class="legL"></div>
+          <div class="legR"></div>
+          <div class="armL"></div>
+          <div class="armR"></div>
 
-<div class="silhouette">
-${top?`<img class="layer top" src="${top.img}">`:""}
-${bottom?`<img class="layer bottom" src="${bottom.img}">`:""}
-${shoes?`<img class="layer shoes" src="${shoes.img}">`:""}
-</div>
-
-</div>`;
+          ${useDress ? `<img class="layer dress" src="${dress.img}">` : ""}
+          ${!useDress && top ? `<img class="layer top" src="${top.img}">` : ""}
+          ${!useDress && bottom ? `<img class="layer bottom" src="${bottom.img}">` : ""}
+          ${shoes ? `<img class="layer shoesL" src="${shoes.img}"><img class="layer shoesR" src="${shoes.img}">` : ""}
+        </div>
+      </div>
+      <div class="small" style="margin-top:10px;">
+        Clean Collage auf längerer, schmaler Figur-Basis.
+      </div>
+    </div>
+  `;
 }
 
 function exportData(){
-const blob=new Blob([JSON.stringify(load())]);
-const a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="outfit.json";
-a.click();
+  const blob = new Blob([JSON.stringify(loadItems(), null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "outfit-data.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 function importData(){
-const r=new FileReader();
-r.onload=()=>{saveData(JSON.parse(r.result));render();}
-r.readAsText(importFile.files[0]);
+  const f = document.getElementById("importFile").files[0];
+  if(!f) return;
+
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const parsed = JSON.parse(r.result);
+      if(!Array.isArray(parsed)) throw new Error("Ungültige Datei.");
+      saveItems(parsed);
+      renderCatalog();
+      showOk("Import erfolgreich.");
+    }catch(err){
+      showError("Import fehlgeschlagen: " + err.message);
+    }
+  };
+  r.readAsText(f);
 }
 
-render();
-
+renderCatalog();
 </script>
 
 </body>
