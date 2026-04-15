@@ -6,82 +6,150 @@
   <title>Outfitfinder</title>
 
   <style>
+    :root {
+      --bg: #020617;
+      --panel: #0f172a;
+      --panel-2: #111827;
+      --card: #020617;
+      --line: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #22c55e;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: system-ui, sans-serif;
-      background: #020617;
-      color: white;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
       padding: 20px;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
     }
 
     h1 {
-      margin-bottom: 10px;
+      margin: 0 0 10px;
+      font-size: 2rem;
+    }
+
+    p.lead {
+      margin: 0 0 20px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.25);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 14px;
+      color: var(--text);
     }
 
     button {
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 10px;
+      width: 100%;
+      padding: 16px;
       border: none;
-      background: #22c55e;
-      color: black;
-      font-weight: bold;
-      width: 100%;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #34d399, #22c55e);
+      color: #04130a;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
     }
 
-    input {
-      margin-top: 10px;
-      margin-bottom: 10px;
-      width: 100%;
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
-    img {
-      width: 100%;
-      border-radius: 12px;
-      margin-top: 15px;
+    .preview-wrap {
+      margin-top: 18px;
     }
 
-    /* 🔥 RESULT CARD */
+    img#preview {
+      width: 100%;
+      display: none;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
     .result-card {
-      background: #0f172a;
-      border-radius: 16px;
+      background: var(--panel);
+      border-radius: 20px;
       padding: 20px;
       margin-top: 20px;
-      border: 1px solid #1e293b;
-      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+      border: 1px solid var(--line);
+      box-shadow: 0 0 30px rgba(0,0,0,0.25);
+      display: none;
     }
 
     .result-card h2 {
-      margin-bottom: 12px;
-      font-size: 20px;
+      margin: 0 0 14px;
+      font-size: 1.4rem;
+      line-height: 1.2;
     }
 
     .tags {
       display: inline-block;
-      background: #22c55e;
-      color: black;
-      padding: 4px 10px;
+      background: var(--accent);
+      color: #04130a;
+      padding: 5px 12px;
       border-radius: 999px;
-      font-size: 12px;
-      margin-bottom: 15px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 18px;
     }
 
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 15px;
+      margin-bottom: 16px;
     }
 
     .grid div {
-      background: #020617;
-      padding: 10px;
-      border-radius: 8px;
+      background: var(--card);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      min-height: 72px;
+    }
+
+    .grid strong {
+      display: block;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
     }
 
     .grid span {
       display: block;
-      margin-top: 4px;
-      color: #94a3b8;
+      color: var(--muted);
+      line-height: 1.35;
+      word-break: break-word;
     }
 
     .meta {
@@ -91,88 +159,202 @@
     }
 
     .meta span {
-      background: #020617;
-      padding: 6px 10px;
+      background: var(--card);
+      padding: 8px 12px;
       border-radius: 999px;
-      font-size: 12px;
-      color: #94a3b8;
+      border: 1px solid var(--line);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .error-box {
+      display: none;
+      margin-top: 18px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fecaca;
+      padding: 14px;
+      border-radius: 14px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    @media (max-width: 640px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      body {
+        padding: 14px;
+      }
+
+      .panel,
+      .result-card {
+        padding: 16px;
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>Outfitfinder</h1>
+      <p class="lead">Bild hochladen und Kleidungsstück per AI analysieren.</p>
 
-  <h1>Outfitfinder</h1>
-  <p>Bild hochladen und Kleidungsstück per AI analysieren.</p>
+      <input type="file" id="fileInput" accept="image/*" />
+      <button id="analyzeBtn" onclick="analyze()">AI erkennen</button>
 
-  <input type="file" id="fileInput" accept="image/*" />
-  <button onclick="analyze()">AI erkennen</button>
+      <div class="preview-wrap">
+        <img id="preview" alt="Vorschau" />
+      </div>
 
-  <img id="preview" />
-
-  <!-- 🔥 RESULT UI -->
-  <div class="result-card" id="resultCard" style="display:none;">
-    <h2 id="itemName"></h2>
-    
-    <div class="tags" id="category"></div>
-    
-    <div class="grid">
-      <div><strong>Farbe</strong><span id="color"></span></div>
-      <div><strong>Material</strong><span id="material"></span></div>
-      <div><strong>Style</strong><span id="style"></span></div>
-      <div><strong>Vibe</strong><span id="occasion"></span></div>
+      <div class="status" id="statusText">Bereit.</div>
+      <div class="error-box" id="errorBox"></div>
     </div>
 
-    <div class="meta">
-      <span id="exposure"></span>
-      <span id="warmth"></span>
-      <span id="confidence"></span>
+    <div class="result-card" id="resultCard">
+      <h2 id="itemName"></h2>
+
+      <div class="tags" id="category"></div>
+
+      <div class="grid">
+        <div>
+          <strong>Farbe</strong>
+          <span id="color"></span>
+        </div>
+        <div>
+          <strong>Material</strong>
+          <span id="material"></span>
+        </div>
+        <div>
+          <strong>Style</strong>
+          <span id="style"></span>
+        </div>
+        <div>
+          <strong>Vibe</strong>
+          <span id="occasion"></span>
+        </div>
+      </div>
+
+      <div class="meta">
+        <span id="exposure"></span>
+        <span id="warmth"></span>
+        <span id="confidence"></span>
+      </div>
     </div>
   </div>
 
   <script>
     const fileInput = document.getElementById("fileInput");
     const preview = document.getElementById("preview");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const resultCard = document.getElementById("resultCard");
+    const errorBox = document.getElementById("errorBox");
+    const statusText = document.getElementById("statusText");
+
+    function showError(message) {
+      errorBox.style.display = "block";
+      errorBox.textContent = message;
+    }
+
+    function hideError() {
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
+    }
+
+    function resetResult() {
+      resultCard.style.display = "none";
+      document.getElementById("itemName").innerText = "";
+      document.getElementById("category").innerText = "";
+      document.getElementById("color").innerText = "";
+      document.getElementById("material").innerText = "";
+      document.getElementById("style").innerText = "";
+      document.getElementById("occasion").innerText = "";
+      document.getElementById("exposure").innerText = "";
+      document.getElementById("warmth").innerText = "";
+      document.getElementById("confidence").innerText = "";
+    }
 
     fileInput.onchange = () => {
       const file = fileInput.files[0];
+      if (!file) {
+        preview.style.display = "none";
+        preview.src = "";
+        return;
+      }
+
       preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+      statusText.textContent = "Bild geladen.";
+      hideError();
+      resetResult();
     };
 
     async function analyze() {
       const file = fileInput.files[0];
-      if (!file) return alert("Bitte Bild auswählen");
+
+      if (!file) {
+        alert("Bitte zuerst ein Bild auswählen.");
+        return;
+      }
+
+      analyzeBtn.disabled = true;
+      statusText.textContent = "Analysiere...";
+      hideError();
+      resetResult();
 
       const reader = new FileReader();
+
       reader.onloadend = async () => {
-        const base64 = reader.result.split(",")[1];
+        try {
+          const imageDataUrl = reader.result;
 
-        const res = await fetch("/.netlify/functions/analyze-garment", {
-          method: "POST",
-          body: JSON.stringify({ imageDataUrl: base64 }),
-        });
+          const res = await fetch("/.netlify/functions/analyze-garment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ imageDataUrl })
+          });
 
-        const data = await res.json();
-        const a = data.analysis;
+          const data = await res.json();
 
-        document.getElementById("resultCard").style.display = "block";
+          if (!res.ok || !data.analysis) {
+            resultCard.style.display = "none";
+            showError(data.error || "Keine Analyse erhalten.");
+            statusText.textContent = "Fehler.";
+            return;
+          }
 
-        document.getElementById("itemName").innerText = a.suggestedName;
-        document.getElementById("category").innerText = a.category;
-        document.getElementById("color").innerText = a.color;
-        document.getElementById("material").innerText = a.materialHints.join(", ");
-        document.getElementById("style").innerText = a.styleTags.join(", ");
-        document.getElementById("occasion").innerText = a.occasionFit.join(", ");
+          const a = data.analysis;
 
-        document.getElementById("exposure").innerText = "Exposure: " + a.exposure;
-        document.getElementById("warmth").innerText = "Warmth: " + a.warmth;
-        document.getElementById("confidence").innerText =
-          "Confidence: " + Math.round(a.confidence * 100) + "%";
+          document.getElementById("itemName").innerText = a.suggestedName || "Unbenannt";
+          document.getElementById("category").innerText = a.category || "-";
+          document.getElementById("color").innerText = a.color || "-";
+          document.getElementById("material").innerText = (a.materialHints || []).join(", ") || "-";
+          document.getElementById("style").innerText = (a.styleTags || []).join(", ") || "-";
+          document.getElementById("occasion").innerText = (a.occasionFit || []).join(", ") || "-";
+          document.getElementById("exposure").innerText = "Exposure: " + (a.exposure || "-");
+          document.getElementById("warmth").innerText = "Warmth: " + (a.warmth || "-");
+          document.getElementById("confidence").innerText =
+            "Confidence: " + Math.round((a.confidence || 0) * 100) + "%";
+
+          resultCard.style.display = "block";
+          hideError();
+          statusText.textContent = "Analyse abgeschlossen.";
+        } catch (err) {
+          resultCard.style.display = "none";
+          showError("Fehler: " + err.message);
+          statusText.textContent = "Fehler.";
+        } finally {
+          analyzeBtn.disabled = false;
+        }
       };
 
       reader.readAsDataURL(file);
     }
   </script>
-
 </body>
 </html>
