@@ -1,123 +1,18 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Outfitfinder</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111722;
-      color: white;
-      margin: 0;
-      padding: 24px;
-    }
-    .wrap {
-      max-width: 720px;
-      margin: 0 auto;
-    }
-    .card {
-      background: #1a2230;
-      border: 1px solid #2b3242;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    h1, h2 {
-      margin-top: 0;
-    }
-    input, button, textarea {
-      width: 100%;
-      margin-top: 10px;
-      margin-bottom: 12px;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #2b3242;
-      background: #10141c;
-      color: white;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-    button {
-      background: #42d9d5;
-      color: black;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    img {
-      max-width: 100%;
-      border-radius: 12px;
-      margin-top: 12px;
-    }
-    pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-      background: #0f131a;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #2b3242;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Outfitfinder</h1>
-      <p>Bild hochladen und Kleidungsstück per AI analysieren.</p>
-    </div>
-
-    <div class="card">
-      <h2>Bild analysieren</h2>
-      <input id="fileInput" type="file" accept="image/*" />
-      <button id="analyzeBtn">AI erkennen</button>
-      <div id="preview"></div>
-    </div>
-
-    <div class="card">
-      <h2>Ergebnis</h2>
-      <pre id="result">Noch kein Ergebnis.</pre>
-    </div>
+<div class="result-card" id="resultCard" style="display:none;">
+  <h2 id="itemName"></h2>
+  
+  <div class="tags" id="category"></div>
+  
+  <div class="grid">
+    <div><strong>Farbe</strong><span id="color"></span></div>
+    <div><strong>Material</strong><span id="material"></span></div>
+    <div><strong>Style</strong><span id="style"></span></div>
+    <div><strong>Vibe</strong><span id="occasion"></span></div>
   </div>
 
-  <script>
-    const fileInput = document.getElementById("fileInput");
-    const analyzeBtn = document.getElementById("analyzeBtn");
-    const preview = document.getElementById("preview");
-    const result = document.getElementById("result");
-
-    function fileToDataURL(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    analyzeBtn.addEventListener("click", async () => {
-      const file = fileInput.files[0];
-      if (!file) {
-        result.textContent = "Bitte zuerst ein Bild auswählen.";
-        return;
-      }
-
-      const imageDataUrl = await fileToDataURL(file);
-      preview.innerHTML = `<img src="${imageDataUrl}" alt="Vorschau">`;
-      result.textContent = "Analysiere...";
-
-      try {
-        const res = await fetch("/.netlify/functions/analyze-garment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageDataUrl })
-        });
-
-        const data = await res.json();
-        result.textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        result.textContent = "Fehler: " + err.message;
-      }
-    });
-  </script>
-</body>
-</html>
+  <div class="meta">
+    <span id="exposure"></span>
+    <span id="warmth"></span>
+    <span id="confidence"></span>
+  </div>
+</div>
