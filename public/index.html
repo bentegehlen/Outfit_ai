@@ -545,8 +545,8 @@
       </div>
 
       <div class="actions">
-        <button onclick="generateOutfits()">3 Vorschläge erzeugen</button>
-        <button class="secondary" onclick="generateOutfits()">Neue Vorschläge</button>
+        <button onclick="generateOutfits('fresh')">3 Vorschläge erzeugen</button>
+        <button class="secondary" onclick="generateOutfits('new')">Neue Vorschläge</button>
       </div>
 
       <div id="outfitList" class="outfit-list"></div>
@@ -576,6 +576,7 @@
 
     let batchItems = [];
     let generatedLooks = [];
+    let outfitSeed = 0;
 
     function setTab(name) {
       ["scan", "catalog", "outfits", "looks"].forEach(id => {
@@ -1002,11 +1003,17 @@
       return pool[offset % pool.length];
     }
 
-    function generateOutfits() {
+    function generateOutfits(mode = "fresh") {
       const items = loadItems();
       if (!items.length) {
         document.getElementById("outfitList").innerHTML = '<div class="empty">Speichere zuerst ein paar Teile im Katalog.</div>';
         return;
+      }
+
+      if (mode === "new") {
+        outfitSeed += 3;
+      } else {
+        outfitSeed = 0;
       }
 
       const occasion = document.getElementById("occasionInput").value;
@@ -1017,31 +1024,33 @@
       generatedLooks = [];
 
       for (let i = 0; i < 3; i++) {
+        const offset = outfitSeed + i;
+
         const look = {
           id: uid(),
           occasion,
           style,
           warmth,
           extra,
-          baseTop: pickRotating(items, ["base top"], i),
-          secondTop: pickRotating(items, ["second top","corsage","cardigan"], i),
-          outerwear: pickRotating(items, ["jacket","coat"], i),
-          bottom: pickRotating(items, ["skirt","shorts","trousers"], i),
-          dress: pickRotating(items, ["dress"], i),
-          legwear1: pickRotating(items, ["fishnets","tights"], i),
-          legwear2: pickRotating(items, ["socks","legwarmers"], i),
-          legwear3: pickRotating(items, ["socks","legwarmers"], i + 1),
-          shoes: pickRotating(items, ["shoes"], i),
-          accessory1: pickRotating(items, ["necklace","choker"], i),
-          accessory2: pickRotating(items, ["earrings","bag","belt","harness"], i),
-          accessory3: pickRotating(items, ["bag","belt","harness"], i + 1),
-          accessory4: pickRotating(items, ["earrings","necklace","choker"], i + 1),
+          baseTop: pickRotating(items, ["base top"], offset),
+          secondTop: pickRotating(items, ["second top","corsage","cardigan"], offset),
+          outerwear: pickRotating(items, ["jacket","coat"], offset),
+          bottom: pickRotating(items, ["skirt","shorts","trousers"], offset),
+          dress: pickRotating(items, ["dress"], offset),
+          legwear1: pickRotating(items, ["fishnets","tights"], offset),
+          legwear2: pickRotating(items, ["socks","legwarmers"], offset),
+          legwear3: pickRotating(items, ["socks","legwarmers"], offset + 1),
+          shoes: pickRotating(items, ["shoes"], offset),
+          accessory1: pickRotating(items, ["necklace","choker"], offset),
+          accessory2: pickRotating(items, ["earrings","bag","belt","harness"], offset),
+          accessory3: pickRotating(items, ["bag","belt","harness"], offset + 1),
+          accessory4: pickRotating(items, ["earrings","necklace","choker"], offset + 1),
           renderedImage: null,
           rendering: false,
           renderError: ""
         };
 
-        if (look.dress && i === 2) {
+        if (look.dress && (offset % 3 === 2 || (!look.baseTop || !look.bottom))) {
           look.baseTop = null;
           look.secondTop = null;
           look.bottom = null;
@@ -1055,6 +1064,18 @@
 
     function pieceName(item) {
       return item ? item.suggestedName || item.subcategory || "-" : "-";
+    }
+
+    function outfitScore(look) {
+      const pieces = [
+        look.baseTop, look.secondTop, look.outerwear, look.bottom, look.dress,
+        look.legwear1, look.legwear2, look.legwear3, look.shoes,
+        look.accessory1, look.accessory2, look.accessory3, look.accessory4
+      ].filter(Boolean);
+
+      if (!pieces.length) return 0;
+      const avg = pieces.reduce((sum, p) => sum + Math.round((p.confidence || 0) * 100), 0) / pieces.length;
+      return Math.round(avg);
     }
 
     function renderGeneratedLooks() {
@@ -1102,18 +1123,6 @@
           </div>
         </div>
       `).join("");
-    }
-
-    function outfitScore(look) {
-      const pieces = [
-        look.baseTop, look.secondTop, look.outerwear, look.bottom, look.dress,
-        look.legwear1, look.legwear2, look.legwear3, look.shoes,
-        look.accessory1, look.accessory2, look.accessory3, look.accessory4
-      ].filter(Boolean);
-
-      if (!pieces.length) return 0;
-      const avg = pieces.reduce((sum, p) => sum + Math.round((p.confidence || 0) * 100), 0) / pieces.length;
-      return Math.round(avg);
     }
 
     function buildRenderItems(look) {
@@ -1185,15 +1194,41 @@
       const look = generatedLooks[index];
       if (!look) return;
 
-      const looks = loadLooks();
-      looks.unshift({
-        id: uid(),
-        createdAt: new Date().toISOString(),
-        ...look
-      });
-      saveLooks(looks);
-      renderLooks();
-      setTab("looks");
+      try {
+        const looks = loadLooks();
+
+        const slimLook = {
+          id: uid(),
+          createdAt: new Date().toISOString(),
+          occasion: look.occasion,
+          style: look.style,
+          warmth: look.warmth,
+          extra: look.extra,
+          renderedImage: look.renderedImage || null,
+
+          baseTop: look.baseTop ? { id: look.baseTop.id, name: look.baseTop.suggestedName } : null,
+          secondTop: look.secondTop ? { id: look.secondTop.id, name: look.secondTop.suggestedName } : null,
+          outerwear: look.outerwear ? { id: look.outerwear.id, name: look.outerwear.suggestedName } : null,
+          bottom: look.bottom ? { id: look.bottom.id, name: look.bottom.suggestedName } : null,
+          dress: look.dress ? { id: look.dress.id, name: look.dress.suggestedName } : null,
+          legwear1: look.legwear1 ? { id: look.legwear1.id, name: look.legwear1.suggestedName } : null,
+          legwear2: look.legwear2 ? { id: look.legwear2.id, name: look.legwear2.suggestedName } : null,
+          legwear3: look.legwear3 ? { id: look.legwear3.id, name: look.legwear3.suggestedName } : null,
+          shoes: look.shoes ? { id: look.shoes.id, name: look.shoes.suggestedName } : null,
+          accessory1: look.accessory1 ? { id: look.accessory1.id, name: look.accessory1.suggestedName } : null,
+          accessory2: look.accessory2 ? { id: look.accessory2.id, name: look.accessory2.suggestedName } : null,
+          accessory3: look.accessory3 ? { id: look.accessory3.id, name: look.accessory3.suggestedName } : null,
+          accessory4: look.accessory4 ? { id: look.accessory4.id, name: look.accessory4.suggestedName } : null
+        };
+
+        looks.unshift(slimLook);
+        saveLooks(looks);
+        renderLooks();
+        showOk("Look gespeichert.");
+        setTab("looks");
+      } catch (err) {
+        showError("Look konnte nicht gespeichert werden. Wahrscheinlich ist der lokale Speicher voll.");
+      }
     }
 
     function deleteLook(id) {
@@ -1218,7 +1253,9 @@
           <div class="section-head">
             <div>
               <h3>Look ${index + 1}</h3>
-              <p class="lead" style="margin:6px 0 0;">${escapeHtml(look.occasion)} · ${escapeHtml(look.style)} · ${escapeHtml(look.warmth)}${look.extra ? " · " + escapeHtml(look.extra) : ""}</p>
+              <p class="lead" style="margin:6px 0 0;">
+                ${escapeHtml(look.occasion)} · ${escapeHtml(look.style)} · ${escapeHtml(look.warmth)}${look.extra ? " · " + escapeHtml(look.extra) : ""}
+              </p>
             </div>
             <button class="small danger" onclick="deleteLook('${look.id}')">Look löschen</button>
           </div>
@@ -1232,13 +1269,13 @@
             </div>
 
             <div class="look-meta">
-              <div class="piece-card"><strong>Base Top</strong><span class="muted">${escapeHtml(pieceName(look.baseTop))}</span></div>
-              <div class="piece-card"><strong>Second Top</strong><span class="muted">${escapeHtml(pieceName(look.secondTop))}</span></div>
-              <div class="piece-card"><strong>Outerwear</strong><span class="muted">${escapeHtml(pieceName(look.outerwear))}</span></div>
-              <div class="piece-card"><strong>Bottom / Dress</strong><span class="muted">${escapeHtml(pieceName(look.bottom || look.dress))}</span></div>
-              <div class="piece-card"><strong>Legwear</strong><span class="muted">${escapeHtml([pieceName(look.legwear1), pieceName(look.legwear2), pieceName(look.legwear3)].filter(x => x !== "-").join(" · ") || "-")}</span></div>
-              <div class="piece-card"><strong>Schuhe</strong><span class="muted">${escapeHtml(pieceName(look.shoes))}</span></div>
-              <div class="piece-card"><strong>Accessoires</strong><span class="muted">${escapeHtml([pieceName(look.accessory1), pieceName(look.accessory2), pieceName(look.accessory3), pieceName(look.accessory4)].filter(x => x !== "-").join(" · ") || "-")}</span></div>
+              <div class="piece-card"><strong>Base Top</strong><span class="muted">${escapeHtml(look.baseTop?.name || "-")}</span></div>
+              <div class="piece-card"><strong>Second Top</strong><span class="muted">${escapeHtml(look.secondTop?.name || "-")}</span></div>
+              <div class="piece-card"><strong>Outerwear</strong><span class="muted">${escapeHtml(look.outerwear?.name || "-")}</span></div>
+              <div class="piece-card"><strong>Bottom / Dress</strong><span class="muted">${escapeHtml((look.bottom?.name || look.dress?.name) || "-")}</span></div>
+              <div class="piece-card"><strong>Legwear</strong><span class="muted">${escapeHtml([look.legwear1?.name, look.legwear2?.name, look.legwear3?.name].filter(Boolean).join(" · ") || "-")}</span></div>
+              <div class="piece-card"><strong>Schuhe</strong><span class="muted">${escapeHtml(look.shoes?.name || "-")}</span></div>
+              <div class="piece-card"><strong>Accessoires</strong><span class="muted">${escapeHtml([look.accessory1?.name, look.accessory2?.name, look.accessory3?.name, look.accessory4?.name].filter(Boolean).join(" · ") || "-")}</span></div>
             </div>
           </div>
         </div>
