@@ -26,7 +26,6 @@ export async function handler(event) {
       };
     }
 
-    // Nur Items mit Bild verwenden, max. 8 Referenzen für Stabilität
     const usableItems = items
       .filter(i => i && typeof i.imageDataUrl === "string" && i.imageDataUrl.startsWith("data:image/"))
       .slice(0, 8);
