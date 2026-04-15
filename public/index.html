@@ -1,18 +1,178 @@
-<div class="result-card" id="resultCard" style="display:none;">
-  <h2 id="itemName"></h2>
-  
-  <div class="tags" id="category"></div>
-  
-  <div class="grid">
-    <div><strong>Farbe</strong><span id="color"></span></div>
-    <div><strong>Material</strong><span id="material"></span></div>
-    <div><strong>Style</strong><span id="style"></span></div>
-    <div><strong>Vibe</strong><span id="occasion"></span></div>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Outfitfinder</title>
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #020617;
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #22c55e;
+      color: black;
+      font-weight: bold;
+      width: 100%;
+    }
+
+    input {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    img {
+      width: 100%;
+      border-radius: 12px;
+      margin-top: 15px;
+    }
+
+    /* 🔥 RESULT CARD */
+    .result-card {
+      background: #0f172a;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 20px;
+      border: 1px solid #1e293b;
+      box-shadow: 0 0 30px rgba(0,0,0,0.3);
+    }
+
+    .result-card h2 {
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    .tags {
+      display: inline-block;
+      background: #22c55e;
+      color: black;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      margin-bottom: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .grid div {
+      background: #020617;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .grid span {
+      display: block;
+      margin-top: 4px;
+      color: #94a3b8;
+    }
+
+    .meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meta span {
+      background: #020617;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Outfitfinder</h1>
+  <p>Bild hochladen und Kleidungsstück per AI analysieren.</p>
+
+  <input type="file" id="fileInput" accept="image/*" />
+  <button onclick="analyze()">AI erkennen</button>
+
+  <img id="preview" />
+
+  <!-- 🔥 RESULT UI -->
+  <div class="result-card" id="resultCard" style="display:none;">
+    <h2 id="itemName"></h2>
+    
+    <div class="tags" id="category"></div>
+    
+    <div class="grid">
+      <div><strong>Farbe</strong><span id="color"></span></div>
+      <div><strong>Material</strong><span id="material"></span></div>
+      <div><strong>Style</strong><span id="style"></span></div>
+      <div><strong>Vibe</strong><span id="occasion"></span></div>
+    </div>
+
+    <div class="meta">
+      <span id="exposure"></span>
+      <span id="warmth"></span>
+      <span id="confidence"></span>
+    </div>
   </div>
 
-  <div class="meta">
-    <span id="exposure"></span>
-    <span id="warmth"></span>
-    <span id="confidence"></span>
-  </div>
-</div>
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const preview = document.getElementById("preview");
+
+    fileInput.onchange = () => {
+      const file = fileInput.files[0];
+      preview.src = URL.createObjectURL(file);
+    };
+
+    async function analyze() {
+      const file = fileInput.files[0];
+      if (!file) return alert("Bitte Bild auswählen");
+
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result.split(",")[1];
+
+        const res = await fetch("/.netlify/functions/analyze-garment", {
+          method: "POST",
+          body: JSON.stringify({ imageDataUrl: base64 }),
+        });
+
+        const data = await res.json();
+        const a = data.analysis;
+
+        document.getElementById("resultCard").style.display = "block";
+
+        document.getElementById("itemName").innerText = a.suggestedName;
+        document.getElementById("category").innerText = a.category;
+        document.getElementById("color").innerText = a.color;
+        document.getElementById("material").innerText = a.materialHints.join(", ");
+        document.getElementById("style").innerText = a.styleTags.join(", ");
+        document.getElementById("occasion").innerText = a.occasionFit.join(", ");
+
+        document.getElementById("exposure").innerText = "Exposure: " + a.exposure;
+        document.getElementById("warmth").innerText = "Warmth: " + a.warmth;
+        document.getElementById("confidence").innerText =
+          "Confidence: " + Math.round(a.confidence * 100) + "%";
+      };
+
+      reader.readAsDataURL(file);
+    }
+  </script>
+
+</body>
+</html>
