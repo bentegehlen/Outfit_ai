@@ -1,360 +1,323 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Outfitfinder</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Outfitfinder</title>
 
-  <style>
-    :root {
-      --bg: #020617;
-      --panel: #0f172a;
-      --panel-2: #111827;
-      --card: #020617;
-      --line: #1e293b;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --accent: #22c55e;
-      --error: #ef4444;
-    }
+<style>
+:root {
+--bg:#020617;
+--panel:#0f172a;
+--line:#1e293b;
+--text:#f8fafc;
+--muted:#94a3b8;
+--accent:#22c55e;
+--danger:#ef4444;
+}
 
-    * {
-      box-sizing: border-box;
-    }
+body {
+margin:0;
+font-family:system-ui;
+background:var(--bg);
+color:var(--text);
+padding:12px;
+}
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 20px;
-    }
+.tabbar{
+display:flex;
+gap:6px;
+margin-bottom:12px;
+}
 
-    .wrap {
-      max-width: 760px;
-      margin: 0 auto;
-    }
+.tabbar button{
+flex:1;
+padding:12px;
+border-radius:12px;
+border:none;
+background:#111827;
+color:white;
+}
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: 2rem;
-    }
+.tabbar button.active{
+background:var(--accent);
+color:black;
+font-weight:bold;
+}
 
-    p.lead {
-      margin: 0 0 20px;
-      color: var(--muted);
-      line-height: 1.4;
-    }
+.panel{
+display:none;
+background:var(--panel);
+border:1px solid var(--line);
+border-radius:16px;
+padding:14px;
+}
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.25);
-    }
+.panel.active{display:block;}
 
-    input[type="file"] {
-      width: 100%;
-      margin-top: 10px;
-      margin-bottom: 14px;
-      color: var(--text);
-    }
+input,select{
+width:100%;
+margin-top:8px;
+margin-bottom:10px;
+padding:10px;
+border-radius:10px;
+border:1px solid var(--line);
+background:#020617;
+color:white;
+}
 
-    button {
-      width: 100%;
-      padding: 16px;
-      border: none;
-      border-radius: 14px;
-      background: linear-gradient(180deg, #34d399, #22c55e);
-      color: #04130a;
-      font-weight: 800;
-      font-size: 1rem;
-      cursor: pointer;
-    }
+button.main{
+background:var(--accent);
+color:black;
+font-weight:bold;
+padding:14px;
+border:none;
+border-radius:12px;
+width:100%;
+}
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+img{
+width:100%;
+border-radius:12px;
+margin-top:10px;
+}
 
-    .preview-wrap {
-      margin-top: 18px;
-    }
+.card{
+background:#020617;
+border:1px solid var(--line);
+border-radius:12px;
+padding:10px;
+margin-top:10px;
+}
 
-    img#preview {
-      width: 100%;
-      display: none;
-      border-radius: 18px;
-      background: #fff;
-      border: 1px solid var(--line);
-    }
+.small{
+font-size:12px;
+color:var(--muted);
+}
 
-    .status {
-      margin-top: 12px;
-      font-size: 0.95rem;
-      color: var(--muted);
-    }
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+}
 
-    .result-card {
-      background: var(--panel);
-      border-radius: 20px;
-      padding: 20px;
-      margin-top: 20px;
-      border: 1px solid var(--line);
-      box-shadow: 0 0 30px rgba(0,0,0,0.25);
-      display: none;
-    }
+.tag{
+background:#111827;
+padding:6px 10px;
+border-radius:999px;
+font-size:12px;
+}
 
-    .result-card h2 {
-      margin: 0 0 14px;
-      font-size: 1.4rem;
-      line-height: 1.2;
-    }
-
-    .tags {
-      display: inline-block;
-      background: var(--accent);
-      color: #04130a;
-      padding: 5px 12px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      margin-bottom: 18px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .grid div {
-      background: var(--card);
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      min-height: 72px;
-    }
-
-    .grid strong {
-      display: block;
-      font-size: 0.95rem;
-      margin-bottom: 6px;
-    }
-
-    .grid span {
-      display: block;
-      color: var(--muted);
-      line-height: 1.35;
-      word-break: break-word;
-    }
-
-    .meta {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .meta span {
-      background: var(--card);
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    .error-box {
-      display: none;
-      margin-top: 18px;
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      color: #fecaca;
-      padding: 14px;
-      border-radius: 14px;
-      line-height: 1.4;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    @media (max-width: 640px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      body {
-        padding: 14px;
-      }
-
-      .panel,
-      .result-card {
-        padding: 16px;
-      }
-    }
-  </style>
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="panel">
-      <h1>Outfitfinder</h1>
-      <p class="lead">Bild hochladen und Kleidungsstück per AI analysieren.</p>
 
-      <input type="file" id="fileInput" accept="image/*" />
-      <button id="analyzeBtn" onclick="analyze()">AI erkennen</button>
+<div class="tabbar">
+<button onclick="setTab('scan')" id="t-scan" class="active">Scan</button>
+<button onclick="setTab('catalog')" id="t-cat">Katalog</button>
+<button onclick="setTab('outfits')" id="t-out">Outfits</button>
+</div>
 
-      <div class="preview-wrap">
-        <img id="preview" alt="Vorschau" />
-      </div>
+<!-- SCAN -->
+<div id="scan" class="panel active">
 
-      <div class="status" id="statusText">Bereit.</div>
-      <div class="error-box" id="errorBox"></div>
-    </div>
+<input type="file" id="fileInput" multiple />
 
-    <div class="result-card" id="resultCard">
-      <h2 id="itemName"></h2>
+<button class="main" onclick="analyze()">AI erkennen</button>
 
-      <div class="tags" id="category"></div>
+<img id="preview"/>
 
-      <div class="grid">
-        <div>
-          <strong>Farbe</strong>
-          <span id="color"></span>
-        </div>
-        <div>
-          <strong>Material</strong>
-          <span id="material"></span>
-        </div>
-        <div>
-          <strong>Style</strong>
-          <span id="style"></span>
-        </div>
-        <div>
-          <strong>Vibe</strong>
-          <span id="occasion"></span>
-        </div>
-      </div>
+<div id="result"></div>
 
-      <div class="meta">
-        <span id="exposure"></span>
-        <span id="warmth"></span>
-        <span id="confidence"></span>
-      </div>
-    </div>
-  </div>
+<button class="main" onclick="saveItem()">Speichern</button>
 
-  <script>
-    const fileInput = document.getElementById("fileInput");
-    const preview = document.getElementById("preview");
-    const analyzeBtn = document.getElementById("analyzeBtn");
-    const resultCard = document.getElementById("resultCard");
-    const errorBox = document.getElementById("errorBox");
-    const statusText = document.getElementById("statusText");
+</div>
 
-    function showError(message) {
-      errorBox.style.display = "block";
-      errorBox.textContent = message;
-    }
+<!-- KATALOG -->
+<div id="catalog" class="panel">
 
-    function hideError() {
-      errorBox.style.display = "none";
-      errorBox.textContent = "";
-    }
+<input placeholder="Suche..." id="search" oninput="renderCatalog()"/>
 
-    function resetResult() {
-      resultCard.style.display = "none";
-      document.getElementById("itemName").innerText = "";
-      document.getElementById("category").innerText = "";
-      document.getElementById("color").innerText = "";
-      document.getElementById("material").innerText = "";
-      document.getElementById("style").innerText = "";
-      document.getElementById("occasion").innerText = "";
-      document.getElementById("exposure").innerText = "";
-      document.getElementById("warmth").innerText = "";
-      document.getElementById("confidence").innerText = "";
-    }
+<div id="catalogList"></div>
 
-    fileInput.onchange = () => {
-      const file = fileInput.files[0];
-      if (!file) {
-        preview.style.display = "none";
-        preview.src = "";
-        return;
-      }
+<button onclick="exportData()">Export</button>
+<input type="file" id="importFile" onchange="importData()"/>
 
-      preview.src = URL.createObjectURL(file);
-      preview.style.display = "block";
-      statusText.textContent = "Bild geladen.";
-      hideError();
-      resetResult();
-    };
+</div>
 
-    async function analyze() {
-      const file = fileInput.files[0];
+<!-- OUTFITS -->
+<div id="outfits" class="panel">
 
-      if (!file) {
-        alert("Bitte zuerst ein Bild auswählen.");
-        return;
-      }
+<select id="style">
+<option>dark</option>
+<option>clean</option>
+<option>sexy</option>
+</select>
 
-      analyzeBtn.disabled = true;
-      statusText.textContent = "Analysiere...";
-      hideError();
-      resetResult();
+<button class="main" onclick="generate()">Outfits erzeugen</button>
 
-      const reader = new FileReader();
+<div id="outfitList"></div>
 
-      reader.onloadend = async () => {
-        try {
-          const imageDataUrl = reader.result;
+</div>
 
-          const res = await fetch("/.netlify/functions/analyze-garment", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ imageDataUrl })
-          });
+<script>
 
-          const data = await res.json();
+let current=null;
 
-          if (!res.ok || !data.analysis) {
-            resultCard.style.display = "none";
-            showError(data.error || "Keine Analyse erhalten.");
-            statusText.textContent = "Fehler.";
-            return;
-          }
+function setTab(t){
+document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"))
+document.getElementById(t).classList.add("active")
 
-          const a = data.analysis;
+document.querySelectorAll(".tabbar button").forEach(b=>b.classList.remove("active"))
+document.getElementById("t-"+t).classList.add("active")
+}
 
-          document.getElementById("itemName").innerText = a.suggestedName || "Unbenannt";
-          document.getElementById("category").innerText = a.category || "-";
-          document.getElementById("color").innerText = a.color || "-";
-          document.getElementById("material").innerText = (a.materialHints || []).join(", ") || "-";
-          document.getElementById("style").innerText = (a.styleTags || []).join(", ") || "-";
-          document.getElementById("occasion").innerText = (a.occasionFit || []).join(", ") || "-";
-          document.getElementById("exposure").innerText = "Exposure: " + (a.exposure || "-");
-          document.getElementById("warmth").innerText = "Warmth: " + (a.warmth || "-");
-          document.getElementById("confidence").innerText =
-            "Confidence: " + Math.round((a.confidence || 0) * 100) + "%";
+const STORAGE="items_v1"
 
-          resultCard.style.display = "block";
-          hideError();
-          statusText.textContent = "Analyse abgeschlossen.";
-        } catch (err) {
-          resultCard.style.display = "none";
-          showError("Fehler: " + err.message);
-          statusText.textContent = "Fehler.";
-        } finally {
-          analyzeBtn.disabled = false;
-        }
-      };
+function load(){
+return JSON.parse(localStorage.getItem(STORAGE)||"[]")
+}
 
-      reader.readAsDataURL(file);
-    }
-  </script>
+function save(data){
+localStorage.setItem(STORAGE,JSON.stringify(data))
+}
+
+fileInput.onchange=()=>{
+preview.src=URL.createObjectURL(fileInput.files[0])
+}
+
+async function analyze(){
+
+const file=fileInput.files[0]
+if(!file)return
+
+const r=new FileReader()
+
+r.onloadend=async()=>{
+
+const res=await fetch("/.netlify/functions/analyze-garment",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({imageDataUrl:r.result})
+})
+
+const data=await res.json()
+current=data.analysis
+
+result.innerHTML=`
+<div class="card">
+<b>${current.suggestedName}</b>
+<div class="small">${current.category}</div>
+
+<div class="grid">
+<div>${current.color}</div>
+<div>${current.materialHints.join(",")}</div>
+<div>${current.styleTags.join(",")}</div>
+<div>${current.occasionFit.join(",")}</div>
+</div>
+</div>
+`
+
+}
+
+r.readAsDataURL(file)
+}
+
+function saveItem(){
+
+if(!current)return
+
+const items=load()
+
+items.unshift({
+...current,
+img:preview.src,
+id:Date.now(),
+fav:false
+})
+
+save(items)
+renderCatalog()
+
+}
+
+function renderCatalog(){
+
+const q=search.value.toLowerCase()
+
+const items=load().filter(i=>
+!q || i.suggestedName.toLowerCase().includes(q)
+)
+
+catalogList.innerHTML=items.map(i=>`
+<div class="card">
+
+<img src="${i.img}"/>
+
+<b>${i.suggestedName}</b>
+
+<div class="small">${i.category}</div>
+
+<div>
+<button onclick="fav(${i.id})">★</button>
+<button onclick="del(${i.id})">X</button>
+</div>
+
+</div>
+`).join("")
+}
+
+function fav(id){
+const items=load().map(i=>i.id==id?{...i,fav:!i.fav}:i)
+save(items)
+renderCatalog()
+}
+
+function del(id){
+const items=load().filter(i=>i.id!=id)
+save(items)
+renderCatalog()
+}
+
+function generate(){
+
+const items=load()
+
+const top=items.find(i=>i.category=="top")
+const bottom=items.find(i=>i.category=="bottom")
+const shoes=items.find(i=>i.category=="shoes")
+
+outfitList.innerHTML=`
+<div class="card">
+<b>Outfit</b>
+<img src="${top?.img||""}">
+<img src="${bottom?.img||""}">
+<img src="${shoes?.img||""}">
+</div>
+`
+}
+
+function exportData(){
+const blob=new Blob([JSON.stringify(load())])
+const a=document.createElement("a")
+a.href=URL.createObjectURL(blob)
+a.download="data.json"
+a.click()
+}
+
+function importData(){
+const f=importFile.files[0]
+const r=new FileReader()
+r.onload=()=>{
+save(JSON.parse(r.result))
+renderCatalog()
+}
+r.readAsText(f)
+}
+
+renderCatalog()
+
+</script>
 </body>
 </html>
